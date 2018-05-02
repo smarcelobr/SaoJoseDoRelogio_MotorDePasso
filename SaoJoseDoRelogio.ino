@@ -1,9 +1,19 @@
 /*
-  Blink
-  Turns on an LED on for one second, then off for one second, repeatedly.
- 
-  This example code is in the public domain.
- */
+  Aplicação principal para controle do relógio da torre da Basílica.
+
+  Esta parte do código é responsável por instanciar e configurar os principais componentes
+  para movimentação e controle do relógio.
+
+  Também é responsável em responder os comandos do usuário e acionar os LEDs no painel
+  de controle.
+
+  - Consulte 'Temporizador.h' caso queira observar as chamadas que são realizadas em intervalos pré-definidos.
+  - Consulte 'Relogio.h', se estiver procurando a classe responsável por controlar o tempo certo para enviar pulsos para
+  o driver do motor de passo do relógio.
+  - Consulte 'WD2404.h', se estiver procurando a classe responsável por efetivamente enviar pulsos para o driver do motor de
+    passo do relógio.
+
+*/
 
 #include "temporizador.h"
 #include "WD2404.h"
