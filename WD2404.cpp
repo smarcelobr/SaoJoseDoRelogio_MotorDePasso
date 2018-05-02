@@ -29,10 +29,12 @@ void WD2404::enable() {
 }
 
 void WD2404::disable() {
-  digitalWrite(this->pinEna, HIGH);
-  this->isEnable = false;
-  if (onDisable) 
-     onDisable(this);
+  if (this->isEnable) {
+    digitalWrite(this->pinEna, HIGH);
+    this->isEnable = false;
+    if (onDisable) 
+       onDisable(this);
+  }
 }
 
 void WD2404::mudarDirecao(int direcaoNova) {
@@ -60,7 +62,7 @@ void WD2404::sendPulsos(unsigned long pulsos) {
 
 void WD2404::resetPulsos() {
   this->pulsosAFazer = 0;
-  this->disable();
+  this->disable(); // desliga motor
 }
 
 void WD2404::mudarFaseDoPulso() {

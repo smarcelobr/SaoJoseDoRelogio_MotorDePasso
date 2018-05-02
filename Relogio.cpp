@@ -17,10 +17,8 @@ void Relogio::doEachMillisPorPulso() {
 }
 
 void Relogio::doEachMinuto() {
-    if (ligado) {
-       wd2404->sendPulsos(pulsosPendentes);
-       Serial.println(pulsosPendentes);
-    }
+    wd2404->sendPulsos(pulsosPendentes);
+    Serial.println(pulsosPendentes);
     this->pulsosPendentes = 0;
 }
 
@@ -35,16 +33,20 @@ int Relogio::getMillisPorPulso() {
 void Relogio::ligar() {
   wd2404->sentidoHorario();
   wd2404->resetPulsos();
-  this->pulsosPendentes = 0;
   ligado=true;
   if (onLigado)
      onLigado(this);
+  this->pulsosPendentes=0;
+  aCadaMillisPorPulsoExecuta.reiniciar();
+  aCadaMinutoExecuta.reiniciar();
 }
 
 void Relogio::desligar() {
   ligado=false;
   if (onDesligado)
      onDesligado(this);
+  aCadaMinutoExecuta.pausar();
+  aCadaMillisPorPulsoExecuta.pausar();
 }
 
 

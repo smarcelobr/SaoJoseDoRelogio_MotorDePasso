@@ -68,6 +68,7 @@ void setup() {
 
 // the loop routine runs over and over again forever:
 void loop() {
+  // trata o tempo
   temporizador.atualiza();
 
   // trata os botoes
@@ -92,7 +93,7 @@ void movimentarMotor() {
 void iniciarMovimentoAntiHorario() {
   relogio.desligar();
   wd2404.sentidoAntiHorario();
-  movePonteiroTimer.continuar();
+  movePonteiroTimer.reiniciar();
   Serial.println(F("Ajuste anti-horario iniciado"));
 }
 
@@ -111,7 +112,7 @@ void pararMovimento() {
 
 void relogio_onLigado(Relogio *source) {
   // indica no led que está o relógio funcionado
-  ledModoPiscando.continuar();  
+  ledModoPiscando.reiniciar();  
 }
 
 void relogio_onDesligado(Relogio *source) {

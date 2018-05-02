@@ -38,6 +38,13 @@ public:
    */
   void continuar() { this->emPausa = false; }
  
+  /**
+   * reinicia o temporizador. O intervalo passará a ser contado a partir desta chamada.
+   * Se estiver em pausa, este método retira da pausa.
+   */
+  void reiniciar() { this->reseta(); this->continuar(); }
+ 
+
   boolean isEmPausa() { return this->emPausa; }
   
   friend class Temporizador;

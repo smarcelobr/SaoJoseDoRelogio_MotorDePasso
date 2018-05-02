@@ -17,8 +17,7 @@ void Temporizador::atualiza() {
          if (!it->emPausa) 
              it->executar();
          it->proximaChamada = it->proximaChamada + it->intervalo;
-      }
-    
+      }    
   }
   
   this->lastCurrentMillis = currentMillis;

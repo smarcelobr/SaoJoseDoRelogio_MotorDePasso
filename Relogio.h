@@ -9,6 +9,11 @@
 
 #include "WD2404.h"
 
+/**
+ * Responsável por enviar ao motor de passo (vir driver WD-2404) os pulsos necessários
+ * para movimentar o relógio a cada minuto.
+ * 
+ */
 class Relogio {
 private:
   WD2404 *wd2404;
