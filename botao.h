@@ -18,8 +18,8 @@ private:
   int lastButtonState;
   unsigned long lastDebounceTime;  // the last time the output pin was toggled
   
-  void (*onHighState)(); // funcao callback quando o botão for clicado (necessário chamar o updateStatus() no loop)
-  void (*onLowState)(); // funcao callback quando o botão for clicado (necessário chamar o updateStatus() no loop)
+  void (*onHighState)(Botao *source); // funcao callback quando o botão for clicado (necessário chamar o updateStatus() no loop)
+  void (*onLowState)(Botao *source); // funcao callback quando o botão for clicado (necessário chamar o updateStatus() no loop)
   
 public:  
 
@@ -31,12 +31,12 @@ public:
    /**
     * Durante o setup, vocë pode definir uma função de callback para ser chamada quando o botão mudar para o estado HIGH.
    */
-   void setCallbackOnHIGH( void (*onHighState)() );
+   void setCallbackOnHIGH( void (*onHighState)(Botao *source) );
 
    /**
     * Durante o setup, vocë pode definir uma função de callback para ser chamada quando o botão mudar para o estado LOW.
    */
-   void setCallbackOnLOW( void (*onLowState)() );
+   void setCallbackOnLOW( void (*onLowState)(Botao *source) );
 
    /** 
     * get() retorna o status do botao. Pode ser LOW ou HIGH

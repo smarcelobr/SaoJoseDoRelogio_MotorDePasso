@@ -10,11 +10,11 @@ Botao::Botao(int pinButton): pin(pinButton), lastDebounceTime(0), onHighState(0)
   
 }
 
-void Botao::setCallbackOnHIGH(void (*onHighState)()) {
+void Botao::setCallbackOnHIGH(void (*onHighState)(Botao *source)) {
   this->onHighState = onHighState;
 }
 
-void Botao::setCallbackOnLOW(void (*onLowState)()) {
+void Botao::setCallbackOnLOW(void (*onLowState)(Botao *source)) {
   this->onLowState = onLowState;
 }
 
@@ -38,9 +38,9 @@ void Botao::atualiza() {
 
       // only toggle the LED if the new button state is HIGH
       if (this->buttonState == HIGH && this->onHighState) {
-          this->onHighState();
+          this->onHighState(this);
       } else if (this->buttonState == LOW && this->onLowState) {
-        this->onLowState();
+        this->onLowState(this);
       }
     }
   }

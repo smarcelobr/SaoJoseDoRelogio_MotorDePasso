@@ -24,8 +24,8 @@ private:
   MetodoTemporizado<Relogio> aCadaMinutoExecuta;
   MetodoTemporizado<Relogio> aCadaMillisPorPulsoExecuta;
 
-  void doEachMillisPorPulso();
-  void doEachMinuto();  
+  void doEachMillisPorPulso(ItemTemporizado *source);
+  void doEachMinuto(ItemTemporizado *source);  
   
   void (*onLigado)(Relogio *source); // funcao callback quando o relogio é ligado
   void (*onDesligado)(Relogio *source); // funcao callback quando o relógio é desligado

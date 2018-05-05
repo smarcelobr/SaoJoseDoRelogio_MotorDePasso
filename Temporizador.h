@@ -7,26 +7,30 @@
    #include "WProgram.h"
 #endif   
 
-#define LIMITE_TEMPORIZADORES 8
+#define LIMITE_TEMPORIZADORES 10
 
 class ItemTemporizado {
 protected:
   unsigned long intervalo;
   unsigned long proximaChamada;
+  unsigned long qtdChamadas;
   boolean long emPausa;
 
 public:
-  ItemTemporizado(unsigned long intervalo): intervalo(intervalo), proximaChamada(0), emPausa(false) { reseta(); }
+  ItemTemporizado(unsigned long intervalo): intervalo(intervalo), emPausa(false) { reseta(); }
 
-  virtual void executar() = 0;
+  virtual void executar(ItemTemporizado *source) = 0;
   
   void setIntervalo(int intervalo) { this->intervalo = intervalo; } 
   int getIntervalo() { return this->intervalo; } 
+  
+  /* quantidade de chamadas do executar deste o último reset() */
+  int getQtdChamandas() { return this->qtdChamadas; } 
 
  /** 
   * reseta() - Reinicia a contagem do intervalo.
   */
-  void reseta() { this->proximaChamada = millis() + this->intervalo; }
+  void reseta() { this->proximaChamada = millis() + this->intervalo; this->qtdChamadas = 0;}
   
   /**
    * dá uma pausa nas chamadas.
@@ -55,14 +59,14 @@ public:
  */
 class FuncaoTemporizada: public ItemTemporizado {
 private:
-  void (*funcao)();
+  void (*funcao)(ItemTemporizado *source);
   
 public:
-  FuncaoTemporizada(unsigned long intervalo, void (*funcao)()): ItemTemporizado(intervalo), funcao(funcao) { }
+  FuncaoTemporizada(unsigned long intervalo, void (*funcao)(ItemTemporizado *source)): ItemTemporizado(intervalo), funcao(funcao) { }
   
-  void setFuncao(void (*funcao)()) { this->funcao = funcao; }  
+  void setFuncao(void (*funcao)(ItemTemporizado *source)) { this->funcao = funcao; }  
    
-  void executar() { funcao(); }
+  void executar(ItemTemporizado *source) { funcao(source); }
 } ;
 
 /** 
@@ -71,18 +75,18 @@ public:
 template <class T> class MetodoTemporizado : public ItemTemporizado {
 private:
   T* instancia;
-  void (T::*metodo)();
+  void (T::*metodo)(ItemTemporizado *source);
 
 public:  
 
    /**
     * Cria o temporizador especificando o intevalo (em milisegundos) e o metodo a ser chamado a cada periodo.
     */
-   MetodoTemporizado(unsigned long intervalo, T *instancia, void (T::*metodo)()): ItemTemporizado(intervalo), metodo(metodo), instancia(instancia) { }
+   MetodoTemporizado(unsigned long intervalo, T *instancia, void (T::*metodo)(ItemTemporizado *source)): ItemTemporizado(intervalo), metodo(metodo), instancia(instancia) { }
    
-   void setMetodo(void (T::*metodo)()) { this->metodo = metodo; }
+   void setMetodo(void (T::*metodo)(ItemTemporizado *source)) { this->metodo = metodo; }
    
-   void executar() { (instancia->*metodo)(); }
+   void executar(ItemTemporizado *source) { (instancia->*metodo)(source); }
 };
 
 /**

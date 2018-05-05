@@ -14,8 +14,10 @@ void Temporizador::atualiza() {
       ItemTemporizado *it = this->itens[ix];
 
       if (currentMillis >= it->proximaChamada) {
-         if (!it->emPausa) 
-             it->executar();
+         if (!it->emPausa) {
+             it->qtdChamadas++;
+             it->executar(it);
+         }
          it->proximaChamada = it->proximaChamada + it->intervalo;
       }    
   }

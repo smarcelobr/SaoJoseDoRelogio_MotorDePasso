@@ -65,7 +65,7 @@ void WD2404::resetPulsos() {
   this->disable(); // desliga motor
 }
 
-void WD2404::mudarFaseDoPulso() {
+void WD2404::mudarFaseDoPulso(ItemTemporizado *source) {
   // faz o movimento dos ponteiros
   if (this->pulsosAFazer>0) { // tem pulso pendente?      
       this->enable(); // liga motor

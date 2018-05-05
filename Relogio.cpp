@@ -12,11 +12,11 @@ Relogio::Relogio(WD2404 &wd2404):
  temporizador.add(aCadaMillisPorPulsoExecuta); // a cada 20ms, o metodo mudarFaseDoPulso será executado.
 }
 
-void Relogio::doEachMillisPorPulso() {
+void Relogio::doEachMillisPorPulso(ItemTemporizado *source) {
     this->pulsosPendentes = this->pulsosPendentes + 1;
 }
 
-void Relogio::doEachMinuto() {
+void Relogio::doEachMinuto(ItemTemporizado *source) {
     wd2404->sendPulsos(pulsosPendentes);
     Serial.println(pulsosPendentes);
     this->pulsosPendentes = 0;

@@ -28,7 +28,7 @@ private:
   void (*onDirChange)(WD2404 *source, int dir); // funcao callback quando a direção muda
   void (*onPulChange)(WD2404 *source, int pul); // funcao callback quando o pulso muda
 
-  void mudarFaseDoPulso();
+  void mudarFaseDoPulso(ItemTemporizado *source);
   void mudarDirecao(int direcaoNova);
 public:  
 
