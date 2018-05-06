@@ -45,6 +45,8 @@ public:
   void setCallbackOnMinuto( void (*onMinuto)(ClockInterno *source) ) { this->onMinuto = onMinuto; }
   void setCallbackOnHora( void (*onDesligado)(ClockInterno *source) ) { this->onHora = onHora; }
 
+  void pausar() { this->aCadaSegundoTimer.pausar(); }
+  void continuar() { this->aCadaSegundoTimer.continuar(); }
 };
 
 #endif

@@ -25,7 +25,7 @@ public:
   int getIntervalo() { return this->intervalo; } 
   
   /* quantidade de chamadas do executar deste o último reset() */
-  int getQtdChamandas() { return this->qtdChamadas; } 
+  int getQtdChamadas() { return this->qtdChamadas; } 
 
  /** 
   * reseta() - Reinicia a contagem do intervalo.

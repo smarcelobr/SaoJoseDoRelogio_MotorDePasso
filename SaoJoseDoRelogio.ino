@@ -73,7 +73,7 @@ void setup() {
 
   botaoResetClockInterno.setCallbackOnLOW(botaoResetClockInterno_onClick);
   botaoAjustaClockInterno.setCallbackOnLOW(botaoAjustaClockInterno_onDown);
-  botaoAjustaClockInterno.setCallbackOnLOW(botaoAjustaClockInterno_onUp);
+  botaoAjustaClockInterno.setCallbackOnHIGH(botaoAjustaClockInterno_onUp);
   clockInterno.setCallbackOnSegundo(printHora);
   
 
@@ -170,14 +170,29 @@ void printHora(ClockInterno *clockInterno) {
 }
 
 void botaoAjustaClockInterno_onDown(Botao *source) {
+  clockInterno.pausar();
   clockInternoAjustarTimer.reiniciar();
 }
 
 void botaoAjustaClockInterno_onUp(Botao *source) {
   clockInternoAjustarTimer.pausar();
+  clockInterno.continuar();
 }
 
-void incrementarClockInterno(ItemTemporizado *source) {
-  clockInterno.addSegundos(1);
+void incrementarClockInterno(ItemTemporizado *source) {  
+  unsigned int seg;
+  if (source->getQtdChamadas()<10) {
+    seg = 1;
+  } else if (source->getQtdChamadas()<60) {
+    seg = 10;
+  } else if (source->getQtdChamadas()<120) {
+    seg = 30;
+  } else if (source->getQtdChamadas()<180) {
+    seg = 60; // por minuto
+  } else {
+    seg = 3600; // por hora
+  }
+
+  clockInterno.addSegundos(seg);
   printHora(&clockInterno);
 }
