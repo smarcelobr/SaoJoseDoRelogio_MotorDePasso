@@ -15,9 +15,16 @@ protected:
   unsigned long proximaChamada;
   unsigned long qtdChamadas;
   boolean long emPausa;
+  boolean long aguardaOverflow;
 
 public:
-  ItemTemporizado(unsigned long intervalo): intervalo(intervalo), emPausa(false) { reseta(); }
+  ItemTemporizado(unsigned long intervalo):
+      intervalo(intervalo),
+      emPausa(false),
+      aguardaOverflow(false)
+  {
+         reseta();
+  }
 
   virtual void executar(ItemTemporizado *source) = 0;
   
