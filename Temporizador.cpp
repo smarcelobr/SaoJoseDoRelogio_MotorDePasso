@@ -41,15 +41,14 @@ void Temporizador::atualiza() {
 
       if (!it->aguardaOverflow && currentMillis >= it->proximaChamada) {
         if (!it->emPausa) {
-		     it->qtdChamadas++;
-             it->executar();
-		}
-
+             it->qtdChamadas++;
+             it->executar(it);
+	}
 
          unsigned long ultimaChamada = it->proximaChamada;
          it->proximaChamada = it->proximaChamada + it->intervalo;
          // houve overflow? Se sim, só poderrei comparar com millis() novamente quando ele fizer overflow tb.
-         it->aguardaOverflow = !houveOverflow && (ultimaChamada>it.proximaChamada);
+         it->aguardaOverflow = !houveOverflow && (ultimaChamada>it->proximaChamada);
       }
   }
   

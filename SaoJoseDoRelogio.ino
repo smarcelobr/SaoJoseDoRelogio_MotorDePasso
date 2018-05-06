@@ -23,8 +23,8 @@
  
 // Pin 13 has an LED connected on most Arduino boards.
 // give it a name:
-int led = 13;
-int ledModo = A0;
+int ledModo = 13;
+int ledPulso = A0;
 int ledSentido = A1;
 
 #define RELOGIO_MODO_NORMAL 0
@@ -34,26 +34,30 @@ int ledSentido = A1;
 FuncaoTemporizada ledModoPiscando(500, acendeLedModo);
 FuncaoTemporizada movePonteiroTimer(100, movimentarMotor);
 
-WD2404 wd2404(2, 3, 4); // pinos do Enable, Direcao e Pulso
-Relogio relogio(wd2404);
+WD2404 wd2404_1(2, 3, 4); // pinos do Enable, Direcao e Pulso
+WD2404 wd2404_2(5, 6, 7); // pinos do Enable, Direcao e Pulso
+Relogio relogio_1(wd2404_1);
+Relogio relogio_2(wd2404_2);
 
-Botao botaoAntiHorario(5);
-Botao botaoHorario(6);
+Relogio *relogioAtivo;
+
+Botao botaoAntiHorario(A2);
+Botao botaoHorario(A3);
 
 /* Clock Interno */
-Botao botaoResetClockInterno(7);
-Botao botaoAjustaClockInterno(8);
+Botao botaoResetClockInterno(A4);
+Botao botaoAjustaClockInterno(A5);
 ClockInterno clockInterno(0,0,0);
 FuncaoTemporizada clockInternoAjustarTimer(150, incrementarClockInterno);
 
 // the setup routine runs once when you press reset:
 void setup() {
   // initialize the digital pin as an output.
-  pinMode(led, OUTPUT);
+  pinMode(ledPulso, OUTPUT);
   pinMode(ledModo, OUTPUT);
   pinMode(ledSentido, OUTPUT);
   
-  digitalWrite(led, LOW);
+  digitalWrite(ledPulso, LOW);
   digitalWrite(ledModo, LOW);
   digitalWrite(ledSentido, LOW);
   
@@ -64,16 +68,26 @@ void setup() {
   temporizador.add(ledModoPiscando);
   temporizador.add(movePonteiroTimer);
   temporizador.add(clockInternoAjustarTimer);
-  
-  wd2404.setCallbackOnDirChange(wd2404_onDirChange);
-  wd2404.setCallbackOnPulChange(wd2404_onPulChange);
-  wd2404.setCallbackOnEnable(wd2404_onEnable);
-  wd2404.setCallbackOnDisable(wd2404_onDisable);
 
-  relogio.setCallbackOnLigado(relogio_onLigado);
-  relogio.setCallbackOnDesligado(relogio_onDesligado);
-  
-  relogio.ligar();
+  wd2404_1.setCallbackOnDirChange(wd2404_onDirChange);
+  wd2404_1.setCallbackOnPulChange(wd2404_onPulChange);
+  wd2404_1.setCallbackOnEnable(wd2404_onEnable);
+  wd2404_1.setCallbackOnDisable(wd2404_onDisable);
+
+  wd2404_2.setCallbackOnDirChange(wd2404_onDirChange);
+  wd2404_2.setCallbackOnPulChange(wd2404_onPulChange);
+  wd2404_2.setCallbackOnEnable(wd2404_onEnable);
+  wd2404_2.setCallbackOnDisable(wd2404_onDisable);
+
+  relogio_1.setCallbackOnLigado(relogio_onLigado);
+  relogio_1.setCallbackOnDesligado(relogio_onDesligado);
+  relogio_1.ligar();
+
+  relogio_2.setCallbackOnLigado(relogio_onLigado);
+  relogio_2.setCallbackOnDesligado(relogio_onDesligado);
+  relogio_2.ligar();
+
+  setRelogioAtivo(&relogio_1);  
   
   botaoAntiHorario.setCallbackOnLOW(iniciarMovimentoAntiHorario);
   botaoAntiHorario.setCallbackOnHIGH(pararMovimento);
@@ -104,6 +118,10 @@ void loop() {
   botaoAjustaClockInterno.atualiza();  
 }
 
+void setRelogioAtivo(Relogio *relogio) {  
+  relogioAtivo = relogio;
+}
+
 void acendeLedModo(ItemTemporizado *source) {
   digitalWrite(ledModo, HIGH);
   ledModoPiscando.setFuncao(apagaLedModo);
@@ -115,26 +133,26 @@ void apagaLedModo(ItemTemporizado *source) {
 }
 
 void movimentarMotor(ItemTemporizado *source) {
-  wd2404.sendPulsos(5);  
+  relogioAtivo->getWD2404()->sendPulsos(5);  
 }
 
 void iniciarMovimentoAntiHorario(Botao *source) {
-  relogio.desligar();
-  wd2404.sentidoAntiHorario();
+  relogioAtivo->desligar();
+  relogioAtivo->getWD2404()->sentidoAntiHorario();
   movePonteiroTimer.reiniciar();
   Serial.println(F("Ajuste anti-horario iniciado"));
 }
 
 void iniciarMovimentoHorario(Botao *source) {
-  relogio.desligar();
-  wd2404.sentidoHorario();
+  relogioAtivo->desligar();
+  relogioAtivo->getWD2404()->sentidoHorario();
   movePonteiroTimer.continuar();
   Serial.println(F("Ajuste horario iniciado"));
 }
 
 void pararMovimento(Botao *source) {
   movePonteiroTimer.pausar();
-  relogio.ligar();
+  relogioAtivo->ligar();
   Serial.println(F("Ajuste terminado"));
 }
 
@@ -150,19 +168,27 @@ void relogio_onDesligado(Relogio *source) {
 }
 
 void wd2404_onDirChange(WD2404 *source, int dir) {  
-  digitalWrite(ledSentido, dir);
+  if (source == relogioAtivo->getWD2404()) {
+    digitalWrite(ledSentido, dir);
+  }
 }
 
 void wd2404_onPulChange(WD2404 *source, int pul) {  
-  digitalWrite(led, pul);
+  if (source == relogioAtivo->getWD2404()) {
+    digitalWrite(ledPulso, pul);
+  }
 }
 
 void wd2404_onEnable(WD2404 *source) {
-  Serial.println(F("Motor de passo ENABLED"));
+  if (source == relogioAtivo->getWD2404()) {
+    Serial.println(F("Motor de passo ENABLED"));
+  }
 }
 
 void wd2404_onDisable(WD2404 *source) {
-  Serial.println(F("Motor de passo DISABLED"));
+  if (source == relogioAtivo->getWD2404()) {
+    Serial.println(F("Motor de passo DISABLED"));
+  }
 }
 
 void botaoResetClockInterno_onClick(Botao *source) {

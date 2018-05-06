@@ -44,9 +44,10 @@ public:
   void desligar();
   
   boolean isLigado() { return ligado; }
+  WD2404 *getWD2404() { return this->wd2404; }
   
-   void setCallbackOnLigado( void (*onLigado)(Relogio *source) ) { this->onLigado = onLigado; }
-   void setCallbackOnDesligado( void (*onDesligado)(Relogio *source) ) { this->onDesligado = onDesligado; }
+  void setCallbackOnLigado( void (*onLigado)(Relogio *source) ) { this->onLigado = onLigado; }
+  void setCallbackOnDesligado( void (*onDesligado)(Relogio *source) ) { this->onDesligado = onDesligado; }
 
 };
 
