@@ -14,8 +14,8 @@ protected:
   unsigned long intervalo;
   unsigned long proximaChamada;
   unsigned long qtdChamadas;
-  boolean long emPausa;
-  boolean long aguardaOverflow;
+  boolean emPausa;
+  boolean aguardaOverflow;
 
 public:
   ItemTemporizado(unsigned long intervalo):

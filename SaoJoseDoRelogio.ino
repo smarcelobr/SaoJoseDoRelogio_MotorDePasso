@@ -1,3 +1,5 @@
+#include <HID.h>
+
 /*
   Aplicação principal para controle do relógio da torre da Basílica.
 
@@ -27,10 +29,16 @@ int ledModo = 13;
 int ledPulso = A0;
 int ledSentido = A1;
 
-#define RELOGIO_MODO_NORMAL 0
-#define RELOGIO_MODO_AJUSTE_HORARIO 1
-#define RELOGIO_MODO_AJUSTE_ANTI_HORARIO 2
+#define MODO_AJUSTE_CLOCKINTERNO 0
+#define MODO_AJUSTE_RELOGIO_1 1
+#define MODO_AJUSTE_RELOGIO_2 2
 
+// Forward declarations
+void acendeLedModo(ItemTemporizado *source);
+void movimentarMotor(ItemTemporizado *source);
+void incrementarClockInterno(ItemTemporizado *source);
+
+// variaveis locais
 FuncaoTemporizada ledModoPiscando(500, acendeLedModo);
 FuncaoTemporizada movePonteiroTimer(100, movimentarMotor);
 
@@ -182,12 +190,14 @@ void wd2404_onPulChange(WD2404 *source, int pul) {
 void wd2404_onEnable(WD2404 *source) {
   if (source == relogioAtivo->getWD2404()) {
     Serial.println(F("Motor de passo ENABLED"));
+    digitalWrite(ledPulso, HIGH);
   }
 }
 
 void wd2404_onDisable(WD2404 *source) {
   if (source == relogioAtivo->getWD2404()) {
     Serial.println(F("Motor de passo DISABLED"));
+    digitalWrite(ledPulso, LOW);
   }
 }
 
