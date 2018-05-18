@@ -3,8 +3,8 @@
 WD2404::WD2404(int pinEnable, int pinDirection, int pinPulso): 
     pinEna(pinEnable), pinDir(pinDirection), pinPul(pinPulso),
     pulsosAFazer(0), faseDoPulso(HIGH), direcaoAtual(LOW),
-    onEnable(0), onDisable(0), onDirChange(0), onPulChange(0),
-    aCadaMudancaFaseDoPulso(20, this, &WD2404::mudarFaseDoPulso) {
+    callbackEnable(0), callbackDisable(0), onDirChange(0), callbackPulChange(0),
+    aCadaMudancaFaseDoPulso(8, this, &WD2404::mudarFaseDoPulso) {
   
   pinMode(pinEna, OUTPUT);
   pinMode(pinDir, OUTPUT);
@@ -23,8 +23,8 @@ void WD2404::enable() {
   if (!this->isEnable) {
     digitalWrite(this->pinEna, LOW);
     this->isEnable = true;
-    if (this->onEnable) 
-       this->onEnable(this);
+    if (this->callbackEnable) 
+       this->callbackEnable->call(this);
   }
 }
 
@@ -32,8 +32,8 @@ void WD2404::disable() {
   if (this->isEnable) {
     digitalWrite(this->pinEna, HIGH);
     this->isEnable = false;
-    if (onDisable) 
-       onDisable(this);
+    if (this->callbackDisable) 
+       this->callbackDisable->call(this);
   }
 }
 
@@ -76,9 +76,9 @@ void WD2404::mudarFaseDoPulso(ItemTemporizado *source) {
         // decrementa cada vez que faz a transição para HIGH
         this->pulsosAFazer--;
       }
-      if (onPulChange) {
+      if (this->callbackPulChange) {
           // executa callback
-          onPulChange(this, this->faseDoPulso);
+          this->callbackPulChange->call(this);
       }
      
       if (this->pulsosAFazer==0) {

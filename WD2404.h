@@ -8,6 +8,7 @@
    #include "WProgram.h"
 #endif   
 
+#include "util.h"
 #include "Temporizador.h"
 
 class WD2404 {
@@ -23,10 +24,10 @@ private:
   int faseDoPulso;
   int direcaoAtual;
 
-  void (*onEnable)(WD2404 *source); // funcao callback quando o motor é habilitado
-  void (*onDisable)(WD2404 *source); // funcao callback quando o motor é desabilitado
   void (*onDirChange)(WD2404 *source, int dir); // funcao callback quando a direção muda
-  void (*onPulChange)(WD2404 *source, int pul); // funcao callback quando o pulso muda
+  Callback<WD2404> *callbackPulChange; // funcao callback quando o pulso muda
+  Callback<WD2404> *callbackEnable; // funcao callback quando o pulso muda
+  Callback<WD2404> *callbackDisable; // funcao callback quando o pulso muda
 
   void mudarFaseDoPulso(ItemTemporizado *source);
   void mudarDirecao(int direcaoNova);
@@ -37,10 +38,10 @@ public:
     */
    WD2404(int pinEnable, int pinDirection, int pinPulso);
    
-   void setCallbackOnEnable( void (*onEnable)(WD2404 *source) ) { this->onEnable = onEnable; }
-   void setCallbackOnDisable( void (*onDisable)(WD2404 *source) ) { this->onDisable = onDisable; }
+   void setCallbackEnable(  Callback<WD2404> *callback ) { this->callbackEnable = callback; }
+   void setCallbackDisable(  Callback<WD2404> *callback ) { this->callbackDisable = callback; }
    void setCallbackOnDirChange( void (*onDirChange)(WD2404 *source, int dir) ) { this->onDirChange = onDirChange; }
-   void setCallbackOnPulChange( void (*onPulChange)(WD2404 *source, int pul) ) { this->onPulChange = onPulChange; }
+   void setCallbackPulChange( Callback<WD2404> *callback ) { this->callbackPulChange = callback; }
 
    /**
     * atualiza() deve ser chamado no loop para a atualização do botão e execução do callback se houver. 
@@ -55,6 +56,9 @@ public:
   
   void enable();
   void disable();
+
+  int getFaseDoPulso() { return this->faseDoPulso; }
+  int getDirecao() { return this->direcaoAtual; }
 
 };
 

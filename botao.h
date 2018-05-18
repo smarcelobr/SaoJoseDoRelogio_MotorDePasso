@@ -8,7 +8,7 @@
    #include "WProgram.h"
 #endif   
 
-#define DEBOUNCE_DELAY 100
+#define DEBOUNCE_DELAY 70
 
 class Botao {
 private:

@@ -22,16 +22,21 @@
 #include "relogio.h"
 #include "botao.h"
 #include "ClockInterno.h"
+#include "IndicaPulsos.h"
  
 // Pin 13 has an LED connected on most Arduino boards.
 // give it a name:
-int ledModo = 13;
-int ledPulso = A0;
-int ledSentido = A1;
+#define ledModo 13      // Led Vermelho comum
+#define ledRelogio1 A0  // RGB Verde
+#define ledRelogio2 A6  // RGB Azul
+#define ledDirecao  A1  // RGB Vermelho
 
-#define MODO_AJUSTE_CLOCKINTERNO 0
+#define MODO_NORMAL 0
 #define MODO_AJUSTE_RELOGIO_1 1
 #define MODO_AJUSTE_RELOGIO_2 2
+#define MODO_AJUSTE_CLOCKINTERNO 3
+
+int modoAtual = MODO_NORMAL;
 
 // Forward declarations
 void acendeLedModo(ItemTemporizado *source);
@@ -40,12 +45,16 @@ void incrementarClockInterno(ItemTemporizado *source);
 
 // variaveis locais
 FuncaoTemporizada ledModoPiscando(500, acendeLedModo);
-FuncaoTemporizada movePonteiroTimer(100, movimentarMotor);
+FuncaoTemporizada movePonteiroTimer(75, movimentarMotor);
 
 WD2404 wd2404_1(2, 3, 4); // pinos do Enable, Direcao e Pulso
 WD2404 wd2404_2(5, 6, 7); // pinos do Enable, Direcao e Pulso
 Relogio relogio_1(wd2404_1);
 Relogio relogio_2(wd2404_2);
+
+// Objetos que conectam um wd2404 a um LED para indicar quando estes pulsam.
+IndicaPulsos indicaPulsosRelogio1(wd2404_1, ledRelogio1);
+IndicaPulsos indicaPulsosRelogio2(wd2404_2, ledRelogio2);
 
 Relogio *relogioAtivo;
 
@@ -61,31 +70,22 @@ FuncaoTemporizada clockInternoAjustarTimer(150, incrementarClockInterno);
 // the setup routine runs once when you press reset:
 void setup() {
   // initialize the digital pin as an output.
-  pinMode(ledPulso, OUTPUT);
   pinMode(ledModo, OUTPUT);
-  pinMode(ledSentido, OUTPUT);
+  pinMode(ledDirecao, OUTPUT);
   
-  digitalWrite(ledPulso, LOW);
   digitalWrite(ledModo, LOW);
-  digitalWrite(ledSentido, LOW);
+  digitalWrite(ledDirecao, LOW);
   
   movePonteiroTimer.pausar();
   ledModoPiscando.pausar();
-  clockInternoAjustarTimer.pausar();  
+  clockInternoAjustarTimer.pausar();
   
   temporizador.add(ledModoPiscando);
   temporizador.add(movePonteiroTimer);
   temporizador.add(clockInternoAjustarTimer);
 
   wd2404_1.setCallbackOnDirChange(wd2404_onDirChange);
-  wd2404_1.setCallbackOnPulChange(wd2404_onPulChange);
-  wd2404_1.setCallbackOnEnable(wd2404_onEnable);
-  wd2404_1.setCallbackOnDisable(wd2404_onDisable);
-
   wd2404_2.setCallbackOnDirChange(wd2404_onDirChange);
-  wd2404_2.setCallbackOnPulChange(wd2404_onPulChange);
-  wd2404_2.setCallbackOnEnable(wd2404_onEnable);
-  wd2404_2.setCallbackOnDisable(wd2404_onDisable);
 
   relogio_1.setCallbackOnLigado(relogio_onLigado);
   relogio_1.setCallbackOnDesligado(relogio_onDesligado);
@@ -107,7 +107,11 @@ void setup() {
   botaoAjustaClockInterno.setCallbackOnLOW(botaoAjustaClockInterno_onDown);
   botaoAjustaClockInterno.setCallbackOnHIGH(botaoAjustaClockInterno_onUp);
   clockInterno.setCallbackOnSegundo(printHora);
+
+  // registra as funções dos botões em cada modo:
+  // modo 0
   
+    
 
   Serial.begin(115200);
   Serial.println(F("Sao Jose do Relogio - v.1.1"));
@@ -177,27 +181,7 @@ void relogio_onDesligado(Relogio *source) {
 
 void wd2404_onDirChange(WD2404 *source, int dir) {  
   if (source == relogioAtivo->getWD2404()) {
-    digitalWrite(ledSentido, dir);
-  }
-}
-
-void wd2404_onPulChange(WD2404 *source, int pul) {  
-  if (source == relogioAtivo->getWD2404()) {
-    digitalWrite(ledPulso, pul);
-  }
-}
-
-void wd2404_onEnable(WD2404 *source) {
-  if (source == relogioAtivo->getWD2404()) {
-    Serial.println(F("Motor de passo ENABLED"));
-    digitalWrite(ledPulso, HIGH);
-  }
-}
-
-void wd2404_onDisable(WD2404 *source) {
-  if (source == relogioAtivo->getWD2404()) {
-    Serial.println(F("Motor de passo DISABLED"));
-    digitalWrite(ledPulso, LOW);
+    digitalWrite(ledDirecao, dir);
   }
 }
 
