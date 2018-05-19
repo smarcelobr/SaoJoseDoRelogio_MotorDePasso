@@ -7,7 +7,7 @@
    #include "WProgram.h"
 #endif   
 
-#define LIMITE_TEMPORIZADORES 10
+#define LIMITE_TEMPORIZADORES 15
 
 class ItemTemporizado {
 protected:
@@ -18,7 +18,8 @@ protected:
   boolean aguardaOverflow;
 
 public:
-  ItemTemporizado(unsigned long intervalo):
+  /* intervalor para cada chamada em milisegundos */
+  ItemTemporizado(unsigned long intervalo):  
       intervalo(intervalo),
       emPausa(false),
       aguardaOverflow(false)
@@ -28,6 +29,9 @@ public:
 
   virtual void executar(ItemTemporizado *source) = 0;
   
+  /**
+   * Altera o intervalo a cada chamada (em milisegundos)
+   */
   void setIntervalo(int intervalo) { this->intervalo = intervalo; } 
   int getIntervalo() { return this->intervalo; } 
   
@@ -123,6 +127,8 @@ public:
    * adiciona um temporizador generico
    */
    void add(ItemTemporizado &item);
+
+   unsigned int getQtdItens() { return this->qtdItens; }
    
 };
 

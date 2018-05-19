@@ -23,6 +23,7 @@
 #include "botao.h"
 #include "ClockInterno.h"
 #include "IndicaPulsos.h"
+#include "LogWD2404_Serial.h"
  
 // Pin 13 has an LED connected on most Arduino boards.
 // give it a name:
@@ -55,6 +56,9 @@ Relogio relogio_2(wd2404_2);
 // Objetos que conectam um wd2404 a um LED para indicar quando estes pulsam.
 IndicaPulsos indicaPulsosRelogio1(wd2404_1, ledRelogio1);
 IndicaPulsos indicaPulsosRelogio2(wd2404_2, ledRelogio2);
+
+LogWD2404_Serial wd2404_1_SerialStatus;
+LogWD2404_Serial wd2404_2_SerialStatus;
 
 Relogio *relogioAtivo;
 
@@ -111,10 +115,18 @@ void setup() {
   // registra as funções dos botões em cada modo:
   // modo 0
   
-    
-
   Serial.begin(115200);
   Serial.println(F("Sao Jose do Relogio - v.1.1"));
+
+  wd2404_1_SerialStatus.begin(F("W1"),wd2404_1);
+  wd2404_2_SerialStatus.begin(F("W2"),wd2404_2);
+
+  unsigned int qtd = temporizador.getQtdItens();
+  Serial.print(F("*T:"));
+  Serial.println(qtd);
+  if (qtd>LIMITE_TEMPORIZADORES) {
+    Serial.println(F("/fail"));
+  }
 }
 
 // the loop routine runs over and over again forever:

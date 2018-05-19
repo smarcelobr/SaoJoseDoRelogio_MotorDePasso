@@ -8,14 +8,28 @@
 #endif   
 
 /**
- * Interface dos Callbacks
- * 
+ * Interface dos Callbacks.
+ * Funciona como uma lista encadeada onde vários callbacks podem ser registrados para um mesmo evento.
  */
 template <class S> class Callback {
-public:  
+protected:  
+ Callback<S> *next;
 
- virtual void call(S *source);
+ virtual void specificCall(S *source)=0;
 
+public:
+ Callback():next(0) { };
+
+ void call(S *source) {
+    this->specificCall(source);
+    if (this->next) {
+      this->next->call(source);
+    }
+ }
+ 
+ void setNext(Callback<S> *next) {
+     this->next = next;
+ }
 };
 
 /**
@@ -30,7 +44,9 @@ public:
   
   void setFuncao(void (*funcao)(S *source)) { this->funcao = funcao; }  
    
-  void call(S *source) { funcao(source); }
+  void specificCall(S *source) { 
+    funcao(source); 
+  }
 } ; 
 
 /**
@@ -46,7 +62,7 @@ public:
    
    void setMetodo(void (T::*metodo)(S *source)) { this->metodo = metodo; }
    
-   void call(S *source) { (instancia->*metodo)(source); }
+   void specificCall(S *source) { (instancia->*metodo)(source); }
 };
 
 

@@ -56,9 +56,10 @@ void Temporizador::atualiza() {
 
 void Temporizador::add(ItemTemporizado &item) {
     if (this->qtdItens<LIMITE_TEMPORIZADORES) {
-       this->itens[this->qtdItens++]=&item;
+       this->itens[this->qtdItens]=&item;
     } else {
        /* TODO chamar CALLBACK para situacao de ALERTA do temporizador*/
     }
+    this->qtdItens++;
  }
 
