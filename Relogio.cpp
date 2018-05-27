@@ -6,10 +6,20 @@ Relogio::Relogio(WD2404 &wd2404):
     ligado(false),
     pulsosPendentes(0),
     aCadaMinutoExecuta(60000, this, &Relogio::doEachMinuto),
-    aCadaMillisPorPulsoExecuta(225, this, &Relogio::doEachMillisPorPulso)
+    aCadaMillisPorPulsoExecuta_1(225, this, &Relogio::doEachMillisPorPulso),
+    aCadaMillisPorPulsoExecuta_2(60000, this, &Relogio::doEachMillisPorPulso)
 { 
+  // pausa todos os pulsadores, exceto o primeiro.
+  for(int i = 1; i < NUM_PULSADORES; ++i) {
+    this->getPulsador(i)->pausar();
+  }
+  aCadaMillisPorPulsoExecuta_2.pausar();
+ 
  temporizador.add(aCadaMinutoExecuta); // a cada 20ms, o metodo mudarFaseDoPulso será executado.
- temporizador.add(aCadaMillisPorPulsoExecuta); // a cada 20ms, o metodo mudarFaseDoPulso será executado.
+  for(int i = 0; i < NUM_PULSADORES; ++i) {
+    MetodoTemporizado<Relogio> *pulsador = this->getPulsador(i);
+    temporizador.add(*pulsador); // a cada 20ms, o metodo mudarFaseDoPulso será executado.
+  }
 }
 
 void Relogio::doEachMillisPorPulso(ItemTemporizado *source) {
@@ -22,12 +32,24 @@ void Relogio::doEachMinuto(ItemTemporizado *source) {
     this->pulsosPendentes = 0;
 }
 
-void Relogio::setMillisPorPulso(int millisPorPulso) {
-  aCadaMillisPorPulsoExecuta.setIntervalo(millisPorPulso);
+MetodoTemporizado<Relogio> * Relogio::getPulsador(int idxPulsador)
+{
+  MetodoTemporizado<Relogio> *aCadaMillisPorPulsoExecuta;
+  switch (idxPulsador) {
+  case 0: aCadaMillisPorPulsoExecuta = &aCadaMillisPorPulsoExecuta_1; 
+          break;
+  case 1: aCadaMillisPorPulsoExecuta = &aCadaMillisPorPulsoExecuta_2; 
+          break;
+  }
+  return aCadaMillisPorPulsoExecuta;  
 }
 
-int Relogio::getMillisPorPulso() {
-  return aCadaMillisPorPulsoExecuta.getIntervalo();
+void Relogio::setMillisPorPulso(int idxPulsador, unsigned long millisPorPulso) {
+  this->getPulsador(idxPulsador)->setIntervalo(millisPorPulso);
+}
+
+unsigned long Relogio::getMillisPorPulso(int idxPulsador) {
+  return this->getPulsador(idxPulsador)->getIntervalo();
 }
 
 void Relogio::ligar() {
@@ -37,7 +59,12 @@ void Relogio::ligar() {
   if (onLigado)
      onLigado(this);
   this->pulsosPendentes=0;
-  aCadaMillisPorPulsoExecuta.reiniciar();
+  for(int i = 0; i < NUM_PULSADORES; ++i) {
+    MetodoTemporizado<Relogio> *pulsador = this->getPulsador(i);
+    if (!pulsador->isEmPausa()) { // se o pulsador estiver ativo, 
+       pulsador->reiniciar();  // reinicia a contagem
+    }
+  }
   aCadaMinutoExecuta.reiniciar();
 }
 
@@ -46,7 +73,19 @@ void Relogio::desligar() {
   if (onDesligado)
      onDesligado(this);
   aCadaMinutoExecuta.pausar();
-  aCadaMillisPorPulsoExecuta.pausar();
 }
 
+void Relogio::acionarPulsador(int idxPulsador, boolean ativar) {
+  MetodoTemporizado<Relogio> *pulsador = this->getPulsador(idxPulsador);
+  if (ativar) {
+    pulsador->reiniciar();
+  } else {
+    pulsador->pausar();
+  }
+}
+
+boolean Relogio::isEmPausa(int idxPulsador) {
+  MetodoTemporizado<Relogio> *pulsador = this->getPulsador(idxPulsador);
+  return pulsador->isEmPausa();
+}
 
