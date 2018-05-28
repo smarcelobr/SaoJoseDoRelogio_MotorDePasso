@@ -24,7 +24,7 @@ public:
       emPausa(false),
       aguardaOverflow(false)
   {
-         reseta();
+         resetar();
   }
 
   virtual void executar(ItemTemporizado *source) = 0;
@@ -39,9 +39,9 @@ public:
   int getQtdChamadas() { return this->qtdChamadas; } 
 
  /** 
-  * reseta() - Reinicia a contagem do intervalo.
+  * resetar() - Reinicia a contagem do intervalo.
   */
-  void reseta() { this->proximaChamada = millis() + this->intervalo; this->qtdChamadas = 0;}
+  void resetar() { this->proximaChamada = millis() + this->intervalo; this->qtdChamadas = 0;}
   
   /**
    * dá uma pausa nas chamadas.
@@ -57,7 +57,7 @@ public:
    * reinicia o temporizador. O intervalo passará a ser contado a partir desta chamada.
    * Se estiver em pausa, este método retira da pausa.
    */
-  void reiniciar() { this->reseta(); this->continuar(); }
+  void reiniciar() { this->resetar(); this->continuar(); }
  
 
   boolean isEmPausa() { return this->emPausa; }
