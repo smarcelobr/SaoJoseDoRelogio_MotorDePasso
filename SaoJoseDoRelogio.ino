@@ -77,9 +77,9 @@ Botao botaoAntiHorario(A2);
 Botao botaoHorario(A3);
 
 /* Clock Interno */
-Botao botaoResetClockInterno(A4);
+//Botao botaoResetClockInterno(A4);
 
-FuncaoTemporizada clockInternoAjustarTimer(150, incrementarClockInterno);
+//FuncaoTemporizada clockInternoAjustarTimer(150, incrementarClockInterno);
 
 
 /* Botao Pausa/Continua: liga ou desliga todos os relógios. */
@@ -104,10 +104,10 @@ void setup() {
   digitalWrite(ledDirecao, LOW);
   
   ledModoPiscando.pausar();
-  clockInternoAjustarTimer.pausar();
+  //clockInternoAjustarTimer.pausar();
   
   temporizador.add(ledModoPiscando);
-  temporizador.add(clockInternoAjustarTimer);
+  //temporizador.add(clockInternoAjustarTimer);
 
   wd2404_1.setCallbackOnDirChange(wd2404_onDirChange);
   wd2404_2.setCallbackOnDirChange(wd2404_onDirChange);
@@ -128,14 +128,14 @@ void setup() {
   botaoHorario.setCallbackOnLOW(iniciarMovimentoHorario);
   botaoHorario.setCallbackOnHIGH(pararMovimento);
 
-  botaoResetClockInterno.setCallbackOnLOW(botaoResetClockInterno_onClick);
-  botaoAjustaClockInterno.setCallbackOnLOW(botaoAjustaClockInterno_onDown);
-  botaoAjustaClockInterno.setCallbackOnHIGH(botaoAjustaClockInterno_onUp);
+//  botaoResetClockInterno.setCallbackOnLOW(botaoResetClockInterno_onClick);
+//  botaoAjustaClockInterno.setCallbackOnLOW(botaoAjustaClockInterno_onDown);
+//  botaoAjustaClockInterno.setCallbackOnHIGH(botaoAjustaClockInterno_onUp);
 
   acaoCursorAtual = &acaoCursor[0];
   botaoPausaContinua.setCallbackOnLOW(botaoPausaContinua_onLow);
   
-  clockInterno.setCallbackOnSegundo(printHora);
+//  clockInterno.setCallbackOnSegundo(printHora);
 
   // registra as funções dos botões em cada modo:
   // modo 0
@@ -198,10 +198,10 @@ void wd2404_onDirChange(WD2404 *source, int dir) {
   }
 }
 
-void botaoResetClockInterno_onClick(Botao *source) {
-  clockInterno.set(0,0,0);
-}
-
+//void botaoResetClockInterno_onClick(Botao *source) {
+//  clockInterno.set(0,0,0);
+//}
+/*
 void printHora(ClockInterno *clockInterno) {
   Serial.print('\r');
   Serial.print(clockInterno->getHora());
@@ -211,8 +211,8 @@ void printHora(ClockInterno *clockInterno) {
   Serial.print(clockInterno->getSegundo());
   Serial.print("    ");
 }
-
-void botaoAjustaClockInterno_onDown(Botao *source) {
+*/
+/*void botaoAjustaClockInterno_onDown(Botao *source) {
   clockInterno.pausar();
   clockInternoAjustarTimer.reiniciar();
 }
@@ -240,4 +240,4 @@ void incrementarClockInterno(ItemTemporizado *source) {
   printHora(&clockInterno);
 }
 
-
+*/

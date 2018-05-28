@@ -22,8 +22,8 @@ private:
   
   MetodoTemporizado<ClockInterno> aCadaSegundoTimer;
   void doEachSegundo(ItemTemporizado *source);  
-  
-  void (*onSegundo)(ClockInterno *source); // funcao callback quando o segundo muda
+
+  Callback<ClockInterno> *callbackOnSegundo;
   void (*onMinuto)(ClockInterno *source); // funcao callback quando um minuto
   void (*onHora)(ClockInterno *source); // funcao callback quando uma hora
     
@@ -41,7 +41,10 @@ public:
   void addSegundos(unsigned int segundos);
   void set(unsigned int hora, unsigned int minuto, unsigned int segundo);
 
-  void setCallbackOnSegundo( void (*onSegundo)(ClockInterno *source) ) { this->onSegundo = onSegundo; }
+  void setCallbackOnSegundo( Callback<ClockInterno> *callback ) {
+      callback->setNext(this->callbackOnSegundo);
+      this->callbackOnSegundo = callback;
+  }
   void setCallbackOnMinuto( void (*onMinuto)(ClockInterno *source) ) { this->onMinuto = onMinuto; }
   void setCallbackOnHora( void (*onDesligado)(ClockInterno *source) ) { this->onHora = onHora; }
 

@@ -79,14 +79,63 @@ public:
 };
 
 class AcaoCursorClockInterno: public AcaoCursor {
+
 ClockInterno *clockInterno;
+MetodoTemporizado<AcaoCursorClockInterno> clockInternoAjustarTimer;
+MetodoCallback<ClockInterno,AcaoCursorClockInterno> callbackOnSegundo;
+
+void printHora(ClockInterno *clockInterno) {
+  Serial.print('\r');
+  Serial.print(clockInterno->getHora());
+  Serial.print(':');
+  Serial.print(clockInterno->getMinuto());
+  Serial.print(':');
+  Serial.print(clockInterno->getSegundo());
+  Serial.print("    ");
+}
+
+void incrementarClockInterno(ItemTemporizado *source) {
+  unsigned int seg;
+  if (source->getQtdChamadas()<10) {
+    seg = 1;
+  } else if (source->getQtdChamadas()<60) {
+    seg = 10;
+  } else if (source->getQtdChamadas()<120) {
+    seg = 30;
+  } else if (source->getQtdChamadas()<180) {
+    seg = 60; // por minuto
+  } else {
+    seg = 3600; // por hora
+  }
+
+  clockInterno->addSegundos(seg);
+  this->printHora(clockInterno);
+}
 
 public:
-  AcaoCursorClockInterno(ClockInterno &clockInterno): AcaoCursor(), clockInterno(&clockInterno) { }
+  AcaoCursorClockInterno(ClockInterno &clockInterno):
+           AcaoCursor(),
+           clockInterno(&clockInterno),
+           clockInternoAjustarTimer(150, this, &AcaoCursorClockInterno::incrementarClockInterno),
+           callbackOnSegundo(this, &ClockInterno::printHora)
+           {
+              clockInternoAjustarTimer.pausar();
+              temporizador.add(clockInternoAjustarTimer);
 
-  void botaoDireitaOnLow(Botao *botao) { };
-  void botaoDireitaOnHigh(Botao *botao) { };
-  void botaoEsquerdaOnLow(Botao *botao) { };
+              clockInterno->setCallbackOnSegundo(printHora);
+           }
+
+  void botaoDireitaOnLow(Botao *botao) {
+      clockInterno->pausar();
+      clockInternoAjustarTimer.reiniciar();
+  };
+  void botaoDireitaOnHigh(Botao *botao) {
+      clockInternoAjustarTimer.pausar();
+      clockInterno->continuar();
+  };
+  void botaoEsquerdaOnLow(Botao *botao) {
+      clockInterno->set(0,0,0);
+  };
   void botaoEsquerdaOnHigh(Botao *botao) { };
   
 };
