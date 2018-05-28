@@ -61,6 +61,8 @@ public:
    MetodoCallback(T *instancia, void (T::*metodo)(S *source)): Callback<S>(), metodo(metodo), instancia(instancia) { }
    
    void setMetodo(void (T::*metodo)(S *source)) { this->metodo = metodo; }
+
+   void setInstancia(T *instancia) { this->instancia = instancia; }
    
    void specificCall(S *source) { (instancia->*metodo)(source); }
 };

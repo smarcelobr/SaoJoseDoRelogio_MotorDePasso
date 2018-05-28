@@ -24,20 +24,21 @@
 #include "ClockInterno.h"
 #include "IndicaPulsos.h"
 #include "LogWD2404_Serial.h"
+#include "ModoPainel.h"
  
 // Pin 13 has an LED connected on most Arduino boards.
 // give it a name:
 #define ledModo 13      // Led Vermelho comum
 #define ledRelogio1 A0  // RGB Verde
-#define ledRelogio2 A6  // RGB Azul
+#define ledRelogio2 8  // RGB Azul
 #define ledDirecao  A1  // RGB Vermelho
 
 #define MODO_NORMAL 0
 #define MODO_AJUSTE_RELOGIO_1 1
 #define MODO_AJUSTE_RELOGIO_2 2
 #define MODO_AJUSTE_CLOCKINTERNO 3
+#define ULTIMO_MODO MODO_AJUSTE_CLOCKINTERNO
 
-int modoAtual = MODO_NORMAL;
 
 // Forward declarations
 void acendeLedModo(ItemTemporizado *source);
@@ -46,12 +47,22 @@ void incrementarClockInterno(ItemTemporizado *source);
 
 // variaveis locais
 FuncaoTemporizada ledModoPiscando(500, acendeLedModo);
-FuncaoTemporizada movePonteiroTimer(75, movimentarMotor);
 
 WD2404 wd2404_1(2, 3, 4); // pinos do Enable, Direcao e Pulso
 WD2404 wd2404_2(5, 6, 7); // pinos do Enable, Direcao e Pulso
 Relogio relogio_1(wd2404_1);
 Relogio relogio_2(wd2404_2);
+ClockInterno clockInterno(0,0,0);
+
+AcaoCursorNenhuma acaoCursorNenhuma=AcaoCursorNenhuma();
+AcaoCursorRelogio acaoCursorRelogio1(relogio_1);
+AcaoCursorRelogio acaoCursorRelogio2(relogio_2);
+AcaoCursorClockInterno acaoCursorClockInterno(clockInterno);
+
+/* Os botoes direita/esquerda mudam de funcao dependendo do modo: */
+AcaoCursor *acoesCursor[] = {&acaoCursorNenhuma,&acaoCursorRelogio1,&acaoCursorRelogio2,&acaoCursorClockInterno};
+
+AcaoCursor *acaoCursorAtual=acoesCursor[0];
 
 // Objetos que conectam um wd2404 a um LED para indicar quando estes pulsam.
 IndicaPulsos indicaPulsosRelogio1(wd2404_1, ledRelogio1);
@@ -67,9 +78,21 @@ Botao botaoHorario(A3);
 
 /* Clock Interno */
 Botao botaoResetClockInterno(A4);
-Botao botaoAjustaClockInterno(A5);
-ClockInterno clockInterno(0,0,0);
+
 FuncaoTemporizada clockInternoAjustarTimer(150, incrementarClockInterno);
+
+
+/* Botao Pausa/Continua: liga ou desliga todos os relógios. */
+Botao botaoPausaContinua(A5);
+void botaoPausaContinuaOnClick(Botao *botao) { 
+  if (relogio_1.isLigado()) {
+    relogio_1.desligar(); relogio_2.desligar();
+  } else {
+    relogio_1.ligar(); 
+    relogio_2.ligar();
+  }
+}
+FuncaoCallback<Botao> botaoPausaContinua_onLow(botaoPausaContinuaOnClick);
 
 // the setup routine runs once when you press reset:
 void setup() {
@@ -80,12 +103,10 @@ void setup() {
   digitalWrite(ledModo, LOW);
   digitalWrite(ledDirecao, LOW);
   
-  movePonteiroTimer.pausar();
   ledModoPiscando.pausar();
   clockInternoAjustarTimer.pausar();
   
   temporizador.add(ledModoPiscando);
-  temporizador.add(movePonteiroTimer);
   temporizador.add(clockInternoAjustarTimer);
 
   wd2404_1.setCallbackOnDirChange(wd2404_onDirChange);
@@ -110,6 +131,10 @@ void setup() {
   botaoResetClockInterno.setCallbackOnLOW(botaoResetClockInterno_onClick);
   botaoAjustaClockInterno.setCallbackOnLOW(botaoAjustaClockInterno_onDown);
   botaoAjustaClockInterno.setCallbackOnHIGH(botaoAjustaClockInterno_onUp);
+
+  acaoCursorAtual = &acaoCursor[0];
+  botaoPausaContinua.setCallbackOnLOW(botaoPausaContinua_onLow);
+  
   clockInterno.setCallbackOnSegundo(printHora);
 
   // registra as funções dos botões em cada modo:
@@ -134,12 +159,8 @@ void loop() {
   // trata o tempo
   temporizador.atualiza();
 
-  // trata os botoes
-  botaoAntiHorario.atualiza();
-  botaoHorario.atualiza();    
-  
-  botaoResetClockInterno.atualiza();
-  botaoAjustaClockInterno.atualiza();  
+  // trata os botoes do painel
+  painel->atualiza();
 }
 
 void setRelogioAtivo(Relogio *relogio) {  
@@ -158,26 +179,6 @@ void apagaLedModo(ItemTemporizado *source) {
 
 void movimentarMotor(ItemTemporizado *source) {
   relogioAtivo->getWD2404()->sendPulsos(5);  
-}
-
-void iniciarMovimentoAntiHorario(Botao *source) {
-  relogioAtivo->desligar();
-  relogioAtivo->getWD2404()->sentidoAntiHorario();
-  movePonteiroTimer.reiniciar();
-  Serial.println(F("Ajuste anti-horario iniciado"));
-}
-
-void iniciarMovimentoHorario(Botao *source) {
-  relogioAtivo->desligar();
-  relogioAtivo->getWD2404()->sentidoHorario();
-  movePonteiroTimer.continuar();
-  Serial.println(F("Ajuste horario iniciado"));
-}
-
-void pararMovimento(Botao *source) {
-  movePonteiroTimer.pausar();
-  relogioAtivo->ligar();
-  Serial.println(F("Ajuste terminado"));
 }
 
 void relogio_onLigado(Relogio *source) {
@@ -238,3 +239,5 @@ void incrementarClockInterno(ItemTemporizado *source) {
   clockInterno.addSegundos(seg);
   printHora(&clockInterno);
 }
+
+

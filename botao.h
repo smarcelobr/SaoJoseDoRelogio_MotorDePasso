@@ -7,6 +7,7 @@
 #else
    #include "WProgram.h"
 #endif   
+#include "util.h"
 
 #define DEBOUNCE_DELAY 70
 
@@ -17,10 +18,10 @@ private:
   int buttonState;             // the current reading from the input pin
   int lastButtonState;
   unsigned long lastDebounceTime;  // the last time the output pin was toggled
-  
-  void (*onHighState)(Botao *source); // funcao callback quando o botão for clicado (necessário chamar o updateStatus() no loop)
-  void (*onLowState)(Botao *source); // funcao callback quando o botão for clicado (necessário chamar o updateStatus() no loop)
-  
+
+  Callback<Botao> *callbackOnHigh;  // funcao callback quando o botão for clicado (necessário chamar o updateStatus() no loop)
+  Callback<Botao> *callbackOnLow;   // funcao callback quando o botão for clicado (necessário chamar o updateStatus() no loop)
+
 public:  
 
    /**
@@ -31,12 +32,12 @@ public:
    /**
     * Durante o setup, vocë pode definir uma função de callback para ser chamada quando o botão mudar para o estado HIGH.
    */
-   void setCallbackOnHIGH( void (*onHighState)(Botao *source) );
+   void setCallbackOnHIGH( Callback<Botao> *callbackOnHigh );
 
    /**
     * Durante o setup, vocë pode definir uma função de callback para ser chamada quando o botão mudar para o estado LOW.
    */
-   void setCallbackOnLOW( void (*onLowState)(Botao *source) );
+   void setCallbackOnLOW( Callback<Botao> *callbackOnLow );
 
    /** 
     * get() retorna o status do botao. Pode ser LOW ou HIGH

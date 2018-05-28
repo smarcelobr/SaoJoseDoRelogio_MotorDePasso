@@ -42,7 +42,7 @@ public:
     */
    WD2404(int pinEnable, int pinDirection, int pinPulso);
    
-   void setCallbackEnable(  Callback<WD2404> *callback ) { 
+   void setCallbackEnable(Callback<WD2404> *callback ) { 
       callback->setNext(this->callbackEnable);
       this->callbackEnable = callback;
    }

@@ -1,6 +1,6 @@
 #include "botao.h"
 
-Botao::Botao(int pinButton): pin(pinButton), lastDebounceTime(0), onHighState(0), onLowState(0) {
+Botao::Botao(int pinButton): pin(pinButton), lastDebounceTime(0), callbackOnHigh(0), callbackOnLow(0) {
   this->pin = pinButton;
   pinMode(this->pin, INPUT_PULLUP);
   
@@ -10,12 +10,14 @@ Botao::Botao(int pinButton): pin(pinButton), lastDebounceTime(0), onHighState(0)
   
 }
 
-void Botao::setCallbackOnHIGH(void (*onHighState)(Botao *source)) {
-  this->onHighState = onHighState;
+void Botao::setCallbackOnHIGH(Callback<Botao> *callback) {
+  callback.setNext(this->callbackOnHigh);
+  this->callbackOnHigh = callback;
 }
 
-void Botao::setCallbackOnLOW(void (*onLowState)(Botao *source)) {
-  this->onLowState = onLowState;
+void Botao::setCallbackOnLOW(Callback<Botao> *callback) {
+  callback.setNext(this->callbackOnLow);
+  this->callbackOnLow = callback;
 }
 
 void Botao::atualiza() {
@@ -37,10 +39,10 @@ void Botao::atualiza() {
       this->buttonState = reading;
 
       // only toggle the LED if the new button state is HIGH
-      if (this->buttonState == HIGH && this->onHighState) {
-          this->onHighState(this);
-      } else if (this->buttonState == LOW && this->onLowState) {
-        this->onLowState(this);
+      if (this->buttonState == HIGH && this->callbackOnHigh) {
+          this->callbackOnHigh->call(this);
+      } else if (this->buttonState == LOW && this->callbackOnLow) {
+        this->callbackOnLow->call(this);
       }
     }
   }
