@@ -1,7 +1,7 @@
 #include "ClockInterno.h"
 
 ClockInterno::ClockInterno(unsigned int horaInicial, unsigned int minutoInicial, unsigned int segundoInicial):
-         hora(horaInicial), minuto(minutoInicial), segundo(segundoInicial), onSegundo(0), onMinuto(0), onHora(0),
+         hora(horaInicial), minuto(minutoInicial), segundo(segundoInicial), callbackOnSegundo(0), onMinuto(0), onHora(0),
         aCadaSegundoTimer(1000, this, &ClockInterno::doEachSegundo) { 
          
   temporizador.add(aCadaSegundoTimer);
@@ -27,8 +27,8 @@ void ClockInterno::doEachSegundo(ItemTemporizado *source) {
          onMinuto(this);
   } // if minuto
    
-  if (onSegundo)
-     onSegundo(this);
+  if (this->callbackOnSegundo)
+     this->callbackOnSegundo->call(this);
      
 }
  

@@ -42,8 +42,6 @@
 
 // Forward declarations
 void acendeLedModo(ItemTemporizado *source);
-void movimentarMotor(ItemTemporizado *source);
-void incrementarClockInterno(ItemTemporizado *source);
 
 // variaveis locais
 FuncaoTemporizada ledModoPiscando(500, acendeLedModo);
@@ -62,8 +60,6 @@ AcaoCursorClockInterno acaoCursorClockInterno(clockInterno);
 /* Os botoes direita/esquerda mudam de funcao dependendo do modo: */
 AcaoCursor *acoesCursor[] = {&acaoCursorNenhuma,&acaoCursorRelogio1,&acaoCursorRelogio2,&acaoCursorClockInterno};
 
-AcaoCursor *acaoCursorAtual=acoesCursor[0];
-
 // Objetos que conectam um wd2404 a um LED para indicar quando estes pulsam.
 IndicaPulsos indicaPulsosRelogio1(wd2404_1, ledRelogio1);
 IndicaPulsos indicaPulsosRelogio2(wd2404_2, ledRelogio2);
@@ -73,14 +69,10 @@ LogWD2404_Serial wd2404_2_SerialStatus;
 
 Relogio *relogioAtivo;
 
-Botao botaoAntiHorario(A2);
-Botao botaoHorario(A3);
-
-/* Clock Interno */
-//Botao botaoResetClockInterno(A4);
-
-//FuncaoTemporizada clockInternoAjustarTimer(150, incrementarClockInterno);
-
+/* botao cursor direita e esquerda */
+Botao botaoAntiHorario(A3);
+Botao botaoHorario(A4);
+BotoesCursor botoesCursor(botaoAntiHorario, botaoHorario, acaoCursorNenhuma);
 
 /* Botao Pausa/Continua: liga ou desliga todos os relógios. */
 Botao botaoPausaContinua(A5);
@@ -94,6 +86,15 @@ void botaoPausaContinuaOnClick(Botao *botao) {
 }
 FuncaoCallback<Botao> botaoPausaContinua_onLow(botaoPausaContinuaOnClick);
 
+/* Botao Modo */
+Botao botaoModo(A2);
+byte modo;
+void botaoMudaModoOnClick(Botao *botao) { 
+  modo++;
+  botoesCursor.setAcaoCursor(*acoesCursor[modo%4]);
+}
+FuncaoCallback<Botao> botaoMudaModo_onLow(botaoMudaModoOnClick);
+
 // the setup routine runs once when you press reset:
 void setup() {
   // initialize the digital pin as an output.
@@ -104,10 +105,8 @@ void setup() {
   digitalWrite(ledDirecao, LOW);
   
   ledModoPiscando.pausar();
-  //clockInternoAjustarTimer.pausar();
   
   temporizador.add(ledModoPiscando);
-  //temporizador.add(clockInternoAjustarTimer);
 
   wd2404_1.setCallbackOnDirChange(wd2404_onDirChange);
   wd2404_2.setCallbackOnDirChange(wd2404_onDirChange);
@@ -120,20 +119,7 @@ void setup() {
   relogio_2.setCallbackOnDesligado(relogio_onDesligado);
   relogio_2.ligar();
 
-  setRelogioAtivo(&relogio_1);  
-  
-  botaoAntiHorario.setCallbackOnLOW(iniciarMovimentoAntiHorario);
-  botaoAntiHorario.setCallbackOnHIGH(pararMovimento);
-
-  botaoHorario.setCallbackOnLOW(iniciarMovimentoHorario);
-  botaoHorario.setCallbackOnHIGH(pararMovimento);
-
-//  botaoResetClockInterno.setCallbackOnLOW(botaoResetClockInterno_onClick);
-//  botaoAjustaClockInterno.setCallbackOnLOW(botaoAjustaClockInterno_onDown);
-//  botaoAjustaClockInterno.setCallbackOnHIGH(botaoAjustaClockInterno_onUp);
-
-  acaoCursorAtual = &acaoCursor[0];
-  botaoPausaContinua.setCallbackOnLOW(botaoPausaContinua_onLow);
+  botaoPausaContinua.setCallbackOnLOW(&botaoPausaContinua_onLow);
   
 //  clockInterno.setCallbackOnSegundo(printHora);
 
@@ -159,12 +145,11 @@ void loop() {
   // trata o tempo
   temporizador.atualiza();
 
-  // trata os botoes do painel
-  painel->atualiza();
-}
-
-void setRelogioAtivo(Relogio *relogio) {  
-  relogioAtivo = relogio;
+  // trata os botoes direita e esquerda (cursors) do painel
+  botoesCursor.atualiza();
+  
+  botaoModo.atualiza();
+  botaoPausaContinua.atualiza();
 }
 
 void acendeLedModo(ItemTemporizado *source) {
@@ -175,10 +160,6 @@ void acendeLedModo(ItemTemporizado *source) {
 void apagaLedModo(ItemTemporizado *source) {
   digitalWrite(ledModo, LOW);
   ledModoPiscando.setFuncao(acendeLedModo);
-}
-
-void movimentarMotor(ItemTemporizado *source) {
-  relogioAtivo->getWD2404()->sendPulsos(5);  
 }
 
 void relogio_onLigado(Relogio *source) {
@@ -198,46 +179,3 @@ void wd2404_onDirChange(WD2404 *source, int dir) {
   }
 }
 
-//void botaoResetClockInterno_onClick(Botao *source) {
-//  clockInterno.set(0,0,0);
-//}
-/*
-void printHora(ClockInterno *clockInterno) {
-  Serial.print('\r');
-  Serial.print(clockInterno->getHora());
-  Serial.print(':');
-  Serial.print(clockInterno->getMinuto());
-  Serial.print(':');
-  Serial.print(clockInterno->getSegundo());
-  Serial.print("    ");
-}
-*/
-/*void botaoAjustaClockInterno_onDown(Botao *source) {
-  clockInterno.pausar();
-  clockInternoAjustarTimer.reiniciar();
-}
-
-void botaoAjustaClockInterno_onUp(Botao *source) {
-  clockInternoAjustarTimer.pausar();
-  clockInterno.continuar();
-}
-
-void incrementarClockInterno(ItemTemporizado *source) {  
-  unsigned int seg;
-  if (source->getQtdChamadas()<10) {
-    seg = 1;
-  } else if (source->getQtdChamadas()<60) {
-    seg = 10;
-  } else if (source->getQtdChamadas()<120) {
-    seg = 30;
-  } else if (source->getQtdChamadas()<180) {
-    seg = 60; // por minuto
-  } else {
-    seg = 3600; // por hora
-  }
-
-  clockInterno.addSegundos(seg);
-  printHora(&clockInterno);
-}
-
-*/

@@ -8,6 +8,7 @@
 #endif   
 
 #include "Temporizador.h"
+#include "util.h"
 /**
  * Conta as horas, minutos e segundos usando o clock do arduino.
  * Fiz essa classe apenas para testar a precisão da classe Temporizador 
@@ -29,10 +30,10 @@ private:
     
 public:  
 
-   /**
-    * Cria e configura os pinos como OUTPUT e coloca valores iniciais
-    */
-   ClockInterno(unsigned int horaInicial, unsigned int minutoInicial, unsigned int segundoInicial);
+  /**
+   * Cria e configura os pinos como OUTPUT e coloca valores iniciais
+   */
+  ClockInterno(unsigned int horaInicial, unsigned int minutoInicial, unsigned int segundoInicial);
    
   unsigned int getHora();
   unsigned int getMinuto();

@@ -17,6 +17,40 @@ public:
   virtual void botaoEsquerdaOnHigh(Botao *botao)=0;
 };
 
+
+class BotoesCursor {
+  Botao *botaoEsquerda, *botaoDireita;
+  MetodoCallback<Botao, AcaoCursor> botaoEsquerdaOnLowCallback, botaoEsquerdaOnHighCallback, botaoDireitaOnLowCallback, botaoDireitaOnHighCallback;
+  AcaoCursor *acaoCursor;
+  
+public:
+  BotoesCursor(Botao &botaoEsquerda, Botao &botaoDireita, AcaoCursor &acaoCursor): 
+             botaoEsquerda(&botaoEsquerda), botaoDireita(&botaoDireita),
+             botaoEsquerdaOnLowCallback(&acaoCursor, &AcaoCursor::botaoEsquerdaOnLow),
+             botaoEsquerdaOnHighCallback(&acaoCursor, &AcaoCursor::botaoEsquerdaOnHigh),             
+             botaoDireitaOnLowCallback(&acaoCursor, &AcaoCursor::botaoDireitaOnLow),
+             botaoDireitaOnHighCallback(&acaoCursor, &AcaoCursor::botaoDireitaOnHigh)
+             { 
+        this->botaoEsquerda->setCallbackOnLOW(&botaoEsquerdaOnLowCallback);
+        this->botaoEsquerda->setCallbackOnHIGH(&botaoEsquerdaOnHighCallback);
+        this->botaoDireita->setCallbackOnLOW(&botaoDireitaOnLowCallback);        
+        this->botaoDireita->setCallbackOnHIGH(&botaoDireitaOnHighCallback);
+  }
+  
+  void setAcaoCursor(AcaoCursor &acaoCursor) {
+    botaoEsquerdaOnLowCallback.setInstancia(&acaoCursor);
+    botaoEsquerdaOnHighCallback.setInstancia(&acaoCursor);
+    botaoDireitaOnLowCallback.setInstancia(&acaoCursor);
+    botaoDireitaOnHighCallback.setInstancia(&acaoCursor);
+  }
+  
+  void atualiza() {
+    botaoEsquerda->atualiza();
+    botaoDireita->atualiza();
+  }
+};
+
+
 /**
  * Acao onde os botoes de esquerda e direita nao fazem nada.
  */
@@ -84,16 +118,6 @@ ClockInterno *clockInterno;
 MetodoTemporizado<AcaoCursorClockInterno> clockInternoAjustarTimer;
 MetodoCallback<ClockInterno,AcaoCursorClockInterno> callbackOnSegundo;
 
-void printHora(ClockInterno *clockInterno) {
-  Serial.print('\r');
-  Serial.print(clockInterno->getHora());
-  Serial.print(':');
-  Serial.print(clockInterno->getMinuto());
-  Serial.print(':');
-  Serial.print(clockInterno->getSegundo());
-  Serial.print("    ");
-}
-
 void incrementarClockInterno(ItemTemporizado *source) {
   unsigned int seg;
   if (source->getQtdChamadas()<10) {
@@ -108,8 +132,18 @@ void incrementarClockInterno(ItemTemporizado *source) {
     seg = 3600; // por hora
   }
 
-  clockInterno->addSegundos(seg);
-  this->printHora(clockInterno);
+  this->clockInterno->addSegundos(seg);
+  this->printHora(this->clockInterno);
+}
+
+void printHora(ClockInterno* source) {
+  Serial.print('\r');
+  Serial.print(source->getHora());
+  Serial.print(':');
+  Serial.print(source->getMinuto());
+  Serial.print(':');
+  Serial.print(source->getSegundo());
+  Serial.print("    ");
 }
 
 public:
@@ -117,12 +151,12 @@ public:
            AcaoCursor(),
            clockInterno(&clockInterno),
            clockInternoAjustarTimer(150, this, &AcaoCursorClockInterno::incrementarClockInterno),
-           callbackOnSegundo(this, &ClockInterno::printHora)
+           callbackOnSegundo(this, &AcaoCursorClockInterno::printHora)
            {
               clockInternoAjustarTimer.pausar();
               temporizador.add(clockInternoAjustarTimer);
 
-              clockInterno->setCallbackOnSegundo(printHora);
+              this->clockInterno->setCallbackOnSegundo(&callbackOnSegundo);
            }
 
   void botaoDireitaOnLow(Botao *botao) {
@@ -137,7 +171,8 @@ public:
       clockInterno->set(0,0,0);
   };
   void botaoEsquerdaOnHigh(Botao *botao) { };
-  
+
+
 };
 
 #endif

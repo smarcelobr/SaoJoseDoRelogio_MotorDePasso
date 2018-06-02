@@ -11,12 +11,12 @@ Botao::Botao(int pinButton): pin(pinButton), lastDebounceTime(0), callbackOnHigh
 }
 
 void Botao::setCallbackOnHIGH(Callback<Botao> *callback) {
-  callback.setNext(this->callbackOnHigh);
+  callback->setNext(this->callbackOnHigh);
   this->callbackOnHigh = callback;
 }
 
 void Botao::setCallbackOnLOW(Callback<Botao> *callback) {
-  callback.setNext(this->callbackOnLow);
+  callback->setNext(this->callbackOnLow);
   this->callbackOnLow = callback;
 }
 
