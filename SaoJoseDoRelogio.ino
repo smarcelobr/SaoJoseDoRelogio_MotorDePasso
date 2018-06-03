@@ -127,7 +127,7 @@ void setup() {
   botaoModo.setCallbackOnLOW(&botaoMudaModo_onLow);
   botaoPausaContinua.setCallbackOnLOW(&botaoPausaContinua_onLow);
   
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println(F("Sao Jose do Relogio - v.1.1"));
 
   wd2404_1_SerialStatus.begin(F("W1"),wd2404_1);

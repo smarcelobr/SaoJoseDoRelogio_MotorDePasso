@@ -40,9 +40,9 @@ void Botao::atualiza() {
 
       // only toggle the LED if the new button state is HIGH
       if (this->buttonState == HIGH && this->callbackOnHigh) {
-          this->callbackOnHigh->call(this);
+          this->up();
       } else if (this->buttonState == LOW && this->callbackOnLow) {
-        this->callbackOnLow->call(this);
+        this->down();
       }
     }
   }
@@ -57,3 +57,14 @@ int Botao::get() {
   return this->buttonState;  
 }
 
+void Botao::down() {
+  if (this->callbackOnLow) {
+    this->callbackOnLow->call(this);
+  }
+}
+
+void Botao::up() {
+  if (this->callbackOnHigh) {
+    this->callbackOnHigh->call(this);
+  }
+}
