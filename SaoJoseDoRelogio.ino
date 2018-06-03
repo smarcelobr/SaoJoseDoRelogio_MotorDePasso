@@ -22,9 +22,11 @@
 #include "relogio.h"
 #include "botao.h"
 #include "ClockInterno.h"
-#include "IndicaPulsos.h"
+
+#include "painel_IndicaPulsos.h"
+#include "painel_AcaoCursor.h"
+
 #include "LogWD2404_Serial.h"
-#include "ModoPainel.h"
  
 // Pin 13 has an LED connected on most Arduino boards.
 // give it a name:
@@ -67,8 +69,6 @@ IndicaPulsos indicaPulsosRelogio2(wd2404_2, ledRelogio2);
 LogWD2404_Serial wd2404_1_SerialStatus;
 LogWD2404_Serial wd2404_2_SerialStatus;
 
-Relogio *relogioAtivo;
-
 /* botao cursor direita e esquerda */
 Botao botaoAntiHorario(A3);
 Botao botaoHorario(A4);
@@ -77,9 +77,12 @@ BotoesCursor botoesCursor(botaoAntiHorario, botaoHorario, acaoCursorNenhuma);
 /* Botao Pausa/Continua: liga ou desliga todos os relógios. */
 Botao botaoPausaContinua(A5);
 void botaoPausaContinuaOnClick(Botao *botao) { 
+  Serial.println(F("\nRelogios "));
   if (relogio_1.isLigado()) {
+    Serial.println(F("OFF"));
     relogio_1.desligar(); relogio_2.desligar();
   } else {
+    Serial.println(F("ON"));
     relogio_1.ligar(); 
     relogio_2.ligar();
   }
@@ -91,6 +94,8 @@ Botao botaoModo(A2);
 byte modo;
 void botaoMudaModoOnClick(Botao *botao) { 
   modo++;
+  Serial.print(F("\nMODO:"));
+  Serial.println(modo%4);
   botoesCursor.setAcaoCursor(*acoesCursor[modo%4]);
 }
 FuncaoCallback<Botao> botaoMudaModo_onLow(botaoMudaModoOnClick);
@@ -119,12 +124,8 @@ void setup() {
   relogio_2.setCallbackOnDesligado(relogio_onDesligado);
   relogio_2.ligar();
 
+  botaoModo.setCallbackOnLOW(&botaoMudaModo_onLow);
   botaoPausaContinua.setCallbackOnLOW(&botaoPausaContinua_onLow);
-  
-//  clockInterno.setCallbackOnSegundo(printHora);
-
-  // registra as funções dos botões em cada modo:
-  // modo 0
   
   Serial.begin(115200);
   Serial.println(F("Sao Jose do Relogio - v.1.1"));
@@ -174,8 +175,6 @@ void relogio_onDesligado(Relogio *source) {
 }
 
 void wd2404_onDirChange(WD2404 *source, int dir) {  
-  if (source == relogioAtivo->getWD2404()) {
-    digitalWrite(ledDirecao, dir);
-  }
+  digitalWrite(ledDirecao, dir);
 }
 

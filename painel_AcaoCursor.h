@@ -1,5 +1,5 @@
-#ifndef _MODO_NORMAL_H
-#define _MODO_NORMAL_H
+#ifndef _ACAO_CURSOR_H
+#define _ACAO_CURSOR_H
 
 #if defined(ARDUINO) && ARDUINO >= 100
    #include "Arduino.h"
