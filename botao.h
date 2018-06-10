@@ -49,11 +49,12 @@ public:
     */
   void atualiza();
 
+  /** down() - executa o comportamento do botao quando ele eh pressionado */ 
+  void down();
+
   /** up() - executa o comportamento do botao quando ele eh levantado */
   void up();
   
-  /** down() - executa o comportamento do botao quando ele eh pressionado */ 
-  void down();
 };
 
 

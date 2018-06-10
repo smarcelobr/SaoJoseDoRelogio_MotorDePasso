@@ -27,6 +27,8 @@
 #include "painel_AcaoCursor.h"
 
 #include "LogWD2404_Serial.h"
+
+#include "ComandosViaSerial.h"
  
 // Pin 13 has an LED connected on most Arduino boards.
 // give it a name:
@@ -100,6 +102,8 @@ void botaoMudaModoOnClick(Botao *botao) {
 }
 FuncaoCallback<Botao> botaoMudaModo_onLow(botaoMudaModoOnClick);
 
+ComandosViaSerial comandosViaSerial(botaoModo, botaoPausaContinua, botaoAntiHorario, botaoHorario);
+
 // the setup routine runs once when you press reset:
 void setup() {
   // initialize the digital pin as an output.
@@ -139,6 +143,7 @@ void setup() {
   if (qtd>LIMITE_TEMPORIZADORES) {
     Serial.println(F("/fail"));
   }
+  
 }
 
 // the loop routine runs over and over again forever:
@@ -151,6 +156,8 @@ void loop() {
   
   botaoModo.atualiza();
   botaoPausaContinua.atualiza();
+  
+  comandosViaSerial.atualiza();
 }
 
 void acendeLedModo(ItemTemporizado *source) {
