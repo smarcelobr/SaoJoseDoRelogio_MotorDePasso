@@ -15,8 +15,8 @@ void ComandosViaSerial::atualiza() {
     case 'P': this->botaoPausaContinua->down(); break;
     case '<': this->botaoAntiHorario->down(); break;
     case '[': this->botaoAntiHorario->up(); break;
-    case '>': this->botaoAntiHorario->down(); break;
-    case ']': this->botaoHorario->up(); break;    
+    case '>': this->botaoHorario->down(); break;
+    case ']': this->botaoHorario->up(); break;
     }
 
   }

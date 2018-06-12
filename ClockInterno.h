@@ -15,7 +15,7 @@
  * com um relógio externo.
  * 
  */
-class ClockInterno {
+class ClockInterno : public Clock {
 private:
   unsigned int hora;
   unsigned int minuto;

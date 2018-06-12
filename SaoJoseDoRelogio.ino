@@ -22,6 +22,7 @@
 #include "relogio.h"
 #include "botao.h"
 #include "ClockInterno.h"
+#include "ClockMotorDePasso.h"
 
 #include "painel_IndicaPulsos.h"
 #include "painel_AcaoCursor.h"
@@ -55,14 +56,25 @@ WD2404 wd2404_2(5, 6, 7); // pinos do Enable, Direcao e Pulso
 Relogio relogio_1(wd2404_1);
 Relogio relogio_2(wd2404_2);
 ClockInterno clockInterno(0,0,0);
+ClockMotorDePasso clockMotorDePasso1(&wd2404_1);
+ClockMotorDePasso clockMotorDePasso2(&wd2404_2);
 
 AcaoCursorNenhuma acaoCursorNenhuma=AcaoCursorNenhuma();
-AcaoCursorRelogio acaoCursorRelogio1(relogio_1);
-AcaoCursorRelogio acaoCursorRelogio2(relogio_2);
 AcaoCursorClockInterno acaoCursorClockInterno(clockInterno);
+AcaoCursorClockMotorDePasso acaoCursorClockMotorDePasso1(clockMotorDePasso1);
+AcaoCursorClockMotorDePasso acaoCursorClockMotorDePasso2(clockMotorDePasso2);
+AcaoCursorRelogio acaoCursorRelogio1(relogio_1,acaoCursorClockMotorDePasso1);
+AcaoCursorRelogio acaoCursorRelogio2(relogio_2,acaoCursorClockMotorDePasso2);
+AcaoCursorPulsadorRelogio acaoCursorPulsadorR1_1(relogio_1, 0),acaoCursorPulsadorR1_2(relogio_1, 1);
+AcaoCursorPulsadorRelogio acaoCursorPulsadorR2_1(relogio_2, 0),acaoCursorPulsadorR2_2(relogio_2, 1);
+AcaoCursorAcionaPulsadorRelogio acaoCursorAcionaPulsadorExtraRelogio1(relogio_1,1), acaoCursorAcionaPulsadorExtraRelogio2(relogio_2,1);
 
 /* Os botoes direita/esquerda mudam de funcao dependendo do modo: */
-AcaoCursor *acoesCursor[] = {&acaoCursorNenhuma,&acaoCursorRelogio1,&acaoCursorRelogio2,&acaoCursorClockInterno};
+#define NUM_MODOS 12
+AcaoCursor *acoesCursor[NUM_MODOS] = {&acaoCursorNenhuma,
+     &acaoCursorRelogio1,&acaoCursorClockMotorDePasso1,&acaoCursorPulsadorR1_1,&acaoCursorPulsadorR1_2,&acaoCursorAcionaPulsadorExtraRelogio1,
+     &acaoCursorRelogio2,&acaoCursorClockMotorDePasso2,&acaoCursorPulsadorR2_1,&acaoCursorPulsadorR2_2,&acaoCursorAcionaPulsadorExtraRelogio2,
+     &acaoCursorClockInterno};     
 
 // Objetos que conectam um wd2404 a um LED para indicar quando estes pulsam.
 IndicaPulsos indicaPulsosRelogio1(wd2404_1, ledRelogio1);
@@ -75,6 +87,17 @@ LogWD2404_Serial wd2404_2_SerialStatus;
 Botao botaoAntiHorario(A3);
 Botao botaoHorario(A4);
 BotoesCursor botoesCursor(botaoAntiHorario, botaoHorario, acaoCursorNenhuma);
+
+/* Botao Modo */
+Botao botaoModo(A2);
+byte modo;
+void botaoMudaModoOnClick(Botao *botao) { 
+  modo++;
+  Serial.print(F("\nMODO:"));
+  Serial.println(modo%NUM_MODOS);
+  botoesCursor.setAcaoCursor(*acoesCursor[modo%NUM_MODOS]);
+}
+FuncaoCallback<Botao> botaoMudaModo_onLow(botaoMudaModoOnClick);
 
 /* Botao Pausa/Continua: liga ou desliga todos os relógios. */
 Botao botaoPausaContinua(A5);
@@ -91,16 +114,6 @@ void botaoPausaContinuaOnClick(Botao *botao) {
 }
 FuncaoCallback<Botao> botaoPausaContinua_onLow(botaoPausaContinuaOnClick);
 
-/* Botao Modo */
-Botao botaoModo(A2);
-byte modo;
-void botaoMudaModoOnClick(Botao *botao) { 
-  modo++;
-  Serial.print(F("\nMODO:"));
-  Serial.println(modo%4);
-  botoesCursor.setAcaoCursor(*acoesCursor[modo%4]);
-}
-FuncaoCallback<Botao> botaoMudaModo_onLow(botaoMudaModoOnClick);
 
 ComandosViaSerial comandosViaSerial(botaoModo, botaoPausaContinua, botaoAntiHorario, botaoHorario);
 

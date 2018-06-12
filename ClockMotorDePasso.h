@@ -17,7 +17,7 @@
  * Conta as horas, minutos e segundos baseando-se no movimento do motor de passo ligado a um relogio mecanico.
  * 
  */
-class ClockMotorDePasso {
+class ClockMotorDePasso: public Clock {
 private:
   WD2404 *wd2404;
 
@@ -39,6 +39,7 @@ public:
   ClockMotorDePasso(WD2404 *wd2404);
    
   unsigned long getPassosAcumulados() { return this->passosAcumulados; }
+  void setPassosAcumulados(unsigned long value);
   unsigned int getHora();
   unsigned int getMinuto();
   unsigned int getSegundo();

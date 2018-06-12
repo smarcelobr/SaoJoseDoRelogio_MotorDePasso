@@ -13,7 +13,6 @@ Relogio::Relogio(WD2404 &wd2404):
   for(int i = 1; i < NUM_PULSADORES; ++i) {
     this->getPulsador(i)->pausar();
   }
-  aCadaMillisPorPulsoExecuta_2.pausar();
  
  temporizador.add(aCadaMinutoExecuta); // a cada 20ms, o metodo mudarFaseDoPulso será executado.
   for(int i = 0; i < NUM_PULSADORES; ++i) {

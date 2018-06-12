@@ -8,6 +8,16 @@
 #endif   
 
 /**
+ * Interface para os Relogios
+ */
+class Clock {
+public:
+  virtual unsigned int getHora() = 0;
+  virtual unsigned int getMinuto() = 0;
+  virtual unsigned int getSegundo() = 0;  
+}; 
+
+/**
  * Interface dos Callbacks.
  * Funciona como uma lista encadeada onde vários callbacks podem ser registrados para um mesmo evento.
  */
@@ -63,6 +73,7 @@ public:
    void setMetodo(void (T::*metodo)(S *source)) { this->metodo = metodo; }
 
    void setInstancia(T *instancia) { this->instancia = instancia; }
+   T* getInstancia() { return this->instancia; }
    
    void specificCall(S *source) { (instancia->*metodo)(source); }
 };

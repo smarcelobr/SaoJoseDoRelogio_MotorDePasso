@@ -7,7 +7,7 @@
    #include "WProgram.h"
 #endif   
 
-#define LIMITE_TEMPORIZADORES 15
+#define LIMITE_TEMPORIZADORES 21
 
 class ItemTemporizado {
 protected:
@@ -32,11 +32,11 @@ public:
   /**
    * Altera o intervalo a cada chamada (em milisegundos)
    */
-  void setIntervalo(int intervalo) { this->intervalo = intervalo; } 
-  int getIntervalo() { return this->intervalo; } 
+  void setIntervalo(unsigned long intervalo) { this->intervalo = intervalo; } 
+  unsigned long getIntervalo() { return this->intervalo; } 
   
   /* quantidade de chamadas do executar deste o último reset() */
-  int getQtdChamadas() { return this->qtdChamadas; } 
+  unsigned long getQtdChamadas() { return this->qtdChamadas; } 
 
  /** 
   * resetar() - Reinicia a contagem do intervalo.

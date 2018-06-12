@@ -1,6 +1,6 @@
 #include "ClockInterno.h"
 
-ClockInterno::ClockInterno(unsigned int horaInicial, unsigned int minutoInicial, unsigned int segundoInicial):
+ClockInterno::ClockInterno(unsigned int horaInicial, unsigned int minutoInicial, unsigned int segundoInicial): Clock(),
          hora(horaInicial), minuto(minutoInicial), segundo(segundoInicial), callbackOnSegundo(0), onMinuto(0), onHora(0),
         aCadaSegundoTimer(1000, this, &ClockInterno::doEachSegundo) { 
          
