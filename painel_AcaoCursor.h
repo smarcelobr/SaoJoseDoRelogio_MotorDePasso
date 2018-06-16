@@ -89,9 +89,7 @@ void incrementarClockInterno(ItemTemporizado *source) {
     seg = 1;
   } else if (source->getQtdChamadas()<60) {
     seg = 10;
-  } else if (source->getQtdChamadas()<120) {
-    seg = 30;
-  } else if (source->getQtdChamadas()<180) {
+  } else if (source->getQtdChamadas()<78) {
     seg = 60; // por minuto
   } else {
     seg = 3600; // por hora
@@ -145,6 +143,9 @@ public:
 
 };
 
+/** 
+ * Ajusta o clock do contador do motor de passo sem mexer nos ponteiros do relogio.
+ */
 class AcaoCursorClockMotorDePasso: public AcaoCursor {
 
 ClockMotorDePasso *clockMotorDePasso;
@@ -231,7 +232,7 @@ void printHora(ClockMotorDePasso* source) {
  */
 class AcaoCursorRelogio: public AcaoCursor {
 private:
-
+boolean desligou;
 Relogio *relogio;
 MetodoTemporizado<AcaoCursorRelogio> movePonteiroTimer;
 AcaoCursorClockMotorDePasso *acaoCursorClockMotorDePasso;
@@ -242,23 +243,31 @@ void movimentarMotor(ItemTemporizado *source) {
 
 void pararMovimento() {
   movePonteiroTimer.pausar();
-  relogio->ligar();
+  if (this->desligou)  {
+     relogio->ligar();
+  }
   Serial.println(F("Ajuste terminado"));
 }
 
 public:  
   AcaoCursorRelogio(Relogio &relogio, AcaoCursorClockMotorDePasso &acaoCursorClockMotorDePasso): AcaoCursor(), relogio(&relogio),
-                        movePonteiroTimer(75, this, &AcaoCursorRelogio::movimentarMotor),
-                        acaoCursorClockMotorDePasso(&acaoCursorClockMotorDePasso)
+                        movePonteiroTimer(95, this, &AcaoCursorRelogio::movimentarMotor),
+                        acaoCursorClockMotorDePasso(&acaoCursorClockMotorDePasso),
+                        desligou(false)
                          { 
      movePonteiroTimer.pausar();
      temporizador.add(movePonteiroTimer);
   }
 
   void botaoDireitaOnLow(Botao *botao) { 
-    relogio->desligar();
+    if (relogio->isLigado()) {
+      this->desligou = true;
+      relogio->desligar();
+    } else {
+      this->desligou = false;
+    }
     relogio->getWD2404()->sentidoHorario();
-    movePonteiroTimer.continuar();
+    movePonteiroTimer.reiniciar();
     Serial.println(F("Ajuste horario iniciado"));
   }
   
@@ -293,14 +302,32 @@ void printValor() {
     Serial.println(this->relogio->getMillisPorPulso(idxPulsador), DEC);
 }
 
+/** 
+ dependendo do tempo que está pedindo para incrementar ou decrementar, 
+ a funcao aumenta o numero de incremento ou decremento.
+ */
+int calculaDelta(ItemTemporizado *source) {
+  if (source->getQtdChamadas()<10) {
+    return 1;
+  } else if (source->getQtdChamadas()<25) {
+    return 10; 
+  } else if (source->getQtdChamadas()<50) {
+    return 100; 
+  } else {
+    return 1000; 
+  }    
+}
+
 void incrementarPulsador(ItemTemporizado *source) {
-   this->relogio->setMillisPorPulso(idxPulsador, this->relogio->getMillisPorPulso(idxPulsador)+1);
+   int delta = calculaDelta(source);
+   this->relogio->setMillisPorPulso(idxPulsador, this->relogio->getMillisPorPulso(idxPulsador)+delta);
    printValor();
 }
 
 void decrementarPulsador(ItemTemporizado *source) {
-   this->relogio->setMillisPorPulso(idxPulsador, ((long)this->relogio->getMillisPorPulso(idxPulsador))-1);
-   printValor();
+  int delta = calculaDelta(source); 
+  this->relogio->setMillisPorPulso(idxPulsador, ((long)this->relogio->getMillisPorPulso(idxPulsador))-delta);
+  printValor();
 }
 
 public:

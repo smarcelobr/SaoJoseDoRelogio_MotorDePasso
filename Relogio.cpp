@@ -7,7 +7,7 @@ Relogio::Relogio(WD2404 &wd2404):
     pulsosPendentes(0),
     aCadaMinutoExecuta(60000, this, &Relogio::doEachMinuto),
     aCadaMillisPorPulsoExecuta_1(225, this, &Relogio::doEachMillisPorPulso),
-    aCadaMillisPorPulsoExecuta_2(60000, this, &Relogio::doEachMillisPorPulso)
+    aCadaMillisPorPulsoExecuta_2(50850, this, &Relogio::doEachMillisPorPulso)
 { 
   // pausa todos os pulsadores, exceto o primeiro.
   for(int i = 1; i < NUM_PULSADORES; ++i) {

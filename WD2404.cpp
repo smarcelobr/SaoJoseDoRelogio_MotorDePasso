@@ -4,7 +4,7 @@ WD2404::WD2404(int pinEnable, int pinDirection, int pinPulso):
     pinEna(pinEnable), pinDir(pinDirection), pinPul(pinPulso),
     pulsosAFazer(0), faseDoPulso(HIGH), direcaoAtual(LOW),
     callbackEnable(0), callbackDisable(0), onDirChange(0), callbackPulChange(0),
-    aCadaMudancaFaseDoPulso(8, this, &WD2404::mudarFaseDoPulso),
+    aCadaMudancaFaseDoPulso(10, this, &WD2404::mudarFaseDoPulso),
     desabilitarAposTempo(3000, this, &WD2404::horaParaDesabilitar) {
   
   pinMode(pinEna, OUTPUT);
