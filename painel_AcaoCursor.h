@@ -221,7 +221,9 @@ void printHora(ClockMotorDePasso* source) {
     Serial.print(source->getMinuto());
     Serial.print(':');
     Serial.print(source->getSegundo());
-    Serial.print("    \r\n");
+    Serial.print(F(" ("));
+    Serial.print(source->getPassosAcumulados());
+    Serial.print(F(")    \r\n"));
   }
 }
 

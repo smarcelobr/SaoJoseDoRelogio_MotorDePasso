@@ -23,7 +23,7 @@ private:
   boolean ligado;
   unsigned long pulsosPendentes;
 
-  MetodoTemporizado<Relogio> aCadaMinutoExecuta;
+  //MetodoTemporizado<Relogio> aCadaMinutoExecuta;
   MetodoTemporizado<Relogio> aCadaMillisPorPulsoExecuta_1, aCadaMillisPorPulsoExecuta_2;
 
   void doEachMillisPorPulso(ItemTemporizado *source);

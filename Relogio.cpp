@@ -5,7 +5,7 @@ Relogio::Relogio(WD2404 &wd2404):
     wd2404(&wd2404),
     ligado(false),
     pulsosPendentes(0),
-    aCadaMinutoExecuta(60000, this, &Relogio::doEachMinuto),
+//    aCadaMinutoExecuta(60000, this, &Relogio::doEachMinuto),
     aCadaMillisPorPulsoExecuta_1(225, this, &Relogio::doEachMillisPorPulso),
     aCadaMillisPorPulsoExecuta_2(50850, this, &Relogio::doEachMillisPorPulso)
 { 
@@ -14,23 +14,34 @@ Relogio::Relogio(WD2404 &wd2404):
     this->getPulsador(i)->pausar();
   }
  
- temporizador.add(aCadaMinutoExecuta); // a cada 20ms, o metodo mudarFaseDoPulso será executado.
+// temporizador.add(aCadaMinutoExecuta); // a cada 20ms, o metodo mudarFaseDoPulso será executado.
   for(int i = 0; i < NUM_PULSADORES; ++i) {
     MetodoTemporizado<Relogio> *pulsador = this->getPulsador(i);
     temporizador.add(*pulsador); // a cada 20ms, o metodo mudarFaseDoPulso será executado.
-  }
+ }
 }
 
 void Relogio::doEachMillisPorPulso(ItemTemporizado *source) {
     this->pulsosPendentes = this->pulsosPendentes + 1;
+    
+    if (this->ligado && this->pulsosPendentes>=266) { // a cada minuto...
+      // 266 é quase 1 minuto!
+
+      // agora, os metodos abaixo podem demorar quanto tempo for necessário, pois, não atrapalhará a contagem dos pulsos pendentes
+      wd2404->sendPulsos(this->pulsosPendentes);
+      this->pulsosPendentes = 0; 
+    }
 }
 
-void Relogio::doEachMinuto(ItemTemporizado *source) {
-    wd2404->sendPulsos(pulsosPendentes);
-    Serial.println(pulsosPendentes);
-    this->pulsosPendentes = 0;
-}
+/*void Relogio::doEachMinuto(ItemTemporizado *source) {
+  unsigned long pulsosPendentesLocal = this->pulsosPendentes;
+  this->pulsosPendentes = 0; // posso zerar com segurança, pois, salvei em variavel local
 
+  // agora, os metodos abaixo podem demorar quanto tempo for necessário, pois, não atrapalhará a contagem dos pulsos pendentes
+  wd2404->sendPulsos(pulsosPendentesLocal);
+  Serial.println(pulsosPendentesLocal);
+}
+*/
 MetodoTemporizado<Relogio> * Relogio::getPulsador(int idxPulsador)
 {
   MetodoTemporizado<Relogio> *aCadaMillisPorPulsoExecuta;
@@ -64,14 +75,14 @@ void Relogio::ligar() {
        pulsador->reiniciar();  // reinicia a contagem
     }
   }
-  aCadaMinutoExecuta.reiniciar();
+//  aCadaMinutoExecuta.reiniciar();
 }
 
 void Relogio::desligar() {
   ligado=false;
   if (onDesligado)
      onDesligado(this);
-  aCadaMinutoExecuta.pausar();
+//  aCadaMinutoExecuta.pausar();
 }
 
 void Relogio::acionarPulsador(int idxPulsador, boolean ativar) {

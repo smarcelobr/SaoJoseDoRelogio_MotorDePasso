@@ -22,6 +22,7 @@ private:
   WD2404 *wd2404;
 
   unsigned long passosAcumulados;
+  unsigned int lastSegundo;
   
   Callback<ClockMotorDePasso> *callbackOnSegundo;
   Callback<ClockMotorDePasso> *callbackOnMinuto;

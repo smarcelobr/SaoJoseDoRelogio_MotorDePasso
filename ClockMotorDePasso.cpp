@@ -1,7 +1,7 @@
 #include "ClockMotorDePasso.h"
 
 ClockMotorDePasso::ClockMotorDePasso(WD2404 *wd2404): Clock(),
-    wd2404(wd2404), passosAcumulados(0), 
+    wd2404(wd2404), passosAcumulados(0), lastSegundo(0),
     callbackOnSegundo(0), callbackOnMinuto(0), callbackOnHora(0),
     wd2404OnPulChange(this, &ClockMotorDePasso::contaPassos)
     {
@@ -24,8 +24,12 @@ void ClockMotorDePasso::contaPassos(WD2404 *source) {
      this->passosAcumulados = (this->passosAcumulados%(PASSOS_POR_HORA*24));
      
      // Chamar eventos a cada minuto, hora e segundo
-     if (this->callbackOnSegundo && this->passosAcumulados%(PASSOS_POR_HORA/3600)==0)
-        this->callbackOnSegundo->call(this);
+     if (this->getSegundo()!=this->lastSegundo) {
+        this->lastSegundo = this->getSegundo();
+        if (this->callbackOnSegundo) {
+           this->callbackOnSegundo->call(this);
+        }
+     }
      
   }
   
@@ -50,5 +54,6 @@ void ClockMotorDePasso::set(unsigned int hora, unsigned int minuto, unsigned int
 
 void ClockMotorDePasso::setPassosAcumulados(unsigned long value) {
   this->passosAcumulados = value;
+  this->lastSegundo = this->getSegundo();
 }
 
