@@ -243,11 +243,24 @@ void movimentarMotor(ItemTemporizado *source) {
   relogio->getWD2404()->sendPulsos(5);  
 }
 
+void desligarSeNecessario() {
+    if (this->relogio->isLigado()) {
+      this->desligou = true;
+      this->relogio->desligar();
+    } else {
+      this->desligou = false;
+    }
+}
+
+void religarSeDesliguei() {
+  if (this->desligou)  {
+     this->relogio->ligar();
+  }
+}
+
 void pararMovimento() {
   movePonteiroTimer.pausar();
-  if (this->desligou)  {
-     relogio->ligar();
-  }
+  this->religarSeDesliguei();
   Serial.println(F("Ajuste terminado"));
 }
 
@@ -261,20 +274,15 @@ public:
      temporizador.add(movePonteiroTimer);
   }
 
-  void botaoDireitaOnLow(Botao *botao) { 
-    if (relogio->isLigado()) {
-      this->desligou = true;
-      relogio->desligar();
-    } else {
-      this->desligou = false;
-    }
-    relogio->getWD2404()->sentidoHorario();
+  void botaoDireitaOnLow(Botao *botao) {
+    this->desligarSeNecessario();
+    this->relogio->getWD2404()->sentidoHorario();
     movePonteiroTimer.reiniciar();
     Serial.println(F("Ajuste horario iniciado"));
   }
   
   void botaoEsquerdaOnLow(Botao *botao) {
-     relogio->desligar();
+     this->desligarSeNecessario();
      relogio->getWD2404()->sentidoAntiHorario();
      movePonteiroTimer.reiniciar();
      Serial.println(F("Ajuste anti-horario iniciado"));

@@ -21,9 +21,8 @@ private:
   WD2404 *wd2404;
 
   boolean ligado;
-  unsigned long pulsosPendentes;
+  unsigned long pulsosPendentes, pulsosDe3Minutos;
 
-  //MetodoTemporizado<Relogio> aCadaMinutoExecuta;
   MetodoTemporizado<Relogio> aCadaMillisPorPulsoExecuta_1, aCadaMillisPorPulsoExecuta_2;
 
   void doEachMillisPorPulso(ItemTemporizado *source);

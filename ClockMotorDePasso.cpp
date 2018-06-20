@@ -20,8 +20,11 @@ void ClockMotorDePasso::contaPassos(WD2404 *source) {
           // sentido antihorario
          this->passosAcumulados--;
      }
+
      // a cada 24 horas, reseta o contador para 0:
-     this->passosAcumulados = (this->passosAcumulados%(PASSOS_POR_HORA*24));
+     if (this->passosAcumulados >= (PASSOS_POR_HORA*24)) {
+        this->passosAcumulados = this->passosAcumulados - (PASSOS_POR_HORA*24);
+     }
      
      // Chamar eventos a cada minuto, hora e segundo
      if (this->getSegundo()!=this->lastSegundo) {

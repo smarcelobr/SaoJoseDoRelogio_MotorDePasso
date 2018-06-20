@@ -4,8 +4,7 @@
 Relogio::Relogio(WD2404 &wd2404):
     wd2404(&wd2404),
     ligado(false),
-    pulsosPendentes(0),
-//    aCadaMinutoExecuta(60000, this, &Relogio::doEachMinuto),
+    pulsosPendentes(0), pulsosDe3Minutos(0),
     aCadaMillisPorPulsoExecuta_1(225, this, &Relogio::doEachMillisPorPulso),
     aCadaMillisPorPulsoExecuta_2(50850, this, &Relogio::doEachMillisPorPulso)
 { 
@@ -14,7 +13,6 @@ Relogio::Relogio(WD2404 &wd2404):
     this->getPulsador(i)->pausar();
   }
  
-// temporizador.add(aCadaMinutoExecuta); // a cada 20ms, o metodo mudarFaseDoPulso será executado.
   for(int i = 0; i < NUM_PULSADORES; ++i) {
     MetodoTemporizado<Relogio> *pulsador = this->getPulsador(i);
     temporizador.add(*pulsador); // a cada 20ms, o metodo mudarFaseDoPulso será executado.
@@ -22,26 +20,24 @@ Relogio::Relogio(WD2404 &wd2404):
 }
 
 void Relogio::doEachMillisPorPulso(ItemTemporizado *source) {
-    this->pulsosPendentes = this->pulsosPendentes + 1;
-    
-    if (this->ligado && this->pulsosPendentes>=266) { // a cada minuto...
-      // 266 é quase 1 minuto!
 
-      // agora, os metodos abaixo podem demorar quanto tempo for necessário, pois, não atrapalhará a contagem dos pulsos pendentes
+    this->pulsosPendentes = this->pulsosPendentes + 1;
+    this->pulsosDe3Minutos = this->pulsosDe3Minutos + 1;
+
+
+    bool descarregaPulsos = this->pulsosPendentes>=267; // // 267 é um pouquinho mais que 1 minuto e 266 é um pouquinho menos que 1 minuto. Os pulsos só batem quando chega a tres minutos (800 pulsos).
+
+    if (this.pulsosDe3Minutos>=800 ) { // a cada 3 minutos. Descarrega para resincronizar com o minuto exato
+        this.pulsosDe3Minutos=0;
+        descarregaPulsos=true;
+    }
+
+    if (this->ligado && descarregaPulsos) {
       wd2404->sendPulsos(this->pulsosPendentes);
-      this->pulsosPendentes = 0; 
+      this->pulsosPendentes = 0;
     }
 }
 
-/*void Relogio::doEachMinuto(ItemTemporizado *source) {
-  unsigned long pulsosPendentesLocal = this->pulsosPendentes;
-  this->pulsosPendentes = 0; // posso zerar com segurança, pois, salvei em variavel local
-
-  // agora, os metodos abaixo podem demorar quanto tempo for necessário, pois, não atrapalhará a contagem dos pulsos pendentes
-  wd2404->sendPulsos(pulsosPendentesLocal);
-  Serial.println(pulsosPendentesLocal);
-}
-*/
 MetodoTemporizado<Relogio> * Relogio::getPulsador(int idxPulsador)
 {
   MetodoTemporizado<Relogio> *aCadaMillisPorPulsoExecuta;
@@ -75,14 +71,12 @@ void Relogio::ligar() {
        pulsador->reiniciar();  // reinicia a contagem
     }
   }
-//  aCadaMinutoExecuta.reiniciar();
 }
 
 void Relogio::desligar() {
   ligado=false;
   if (onDesligado)
      onDesligado(this);
-//  aCadaMinutoExecuta.pausar();
 }
 
 void Relogio::acionarPulsador(int idxPulsador, boolean ativar) {
