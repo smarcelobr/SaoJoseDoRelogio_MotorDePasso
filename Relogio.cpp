@@ -27,8 +27,8 @@ void Relogio::doEachMillisPorPulso(ItemTemporizado *source) {
 
     bool descarregaPulsos = this->pulsosPendentes>=267; // // 267 é um pouquinho mais que 1 minuto e 266 é um pouquinho menos que 1 minuto. Os pulsos só batem quando chega a tres minutos (800 pulsos).
 
-    if (this.pulsosDe3Minutos>=800 ) { // a cada 3 minutos. Descarrega para resincronizar com o minuto exato
-        this.pulsosDe3Minutos=0;
+    if (this->pulsosDe3Minutos>=800 ) { // a cada 3 minutos. Descarrega para resincronizar com o minuto exato
+        this->pulsosDe3Minutos=0;
         descarregaPulsos=true;
     }
 
@@ -65,6 +65,7 @@ void Relogio::ligar() {
   if (onLigado)
      onLigado(this);
   this->pulsosPendentes=0;
+  this->pulsosDe3Minutos=0;
   for(int i = 0; i < NUM_PULSADORES; ++i) {
     MetodoTemporizado<Relogio> *pulsador = this->getPulsador(i);
     if (!pulsador->isEmPausa()) { // se o pulsador estiver ativo, 
