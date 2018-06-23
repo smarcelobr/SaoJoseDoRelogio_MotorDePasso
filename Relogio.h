@@ -28,8 +28,8 @@ private:
   void doEachMillisPorPulso(ItemTemporizado *source);
   void doEachMinuto(ItemTemporizado *source);  
   
-  void (*onLigado)(Relogio *source); // funcao callback quando o relogio é ligado
-  void (*onDesligado)(Relogio *source); // funcao callback quando o relógio é desligado
+  Callback<Relogio> *callbackOnLigado; // funcao callback quando o relogio é ligado
+  Callback<Relogio> *callbackOnDesligado; // funcao callback quando o relogio é desligado
   
   MetodoTemporizado<Relogio> * getPulsador(int idxPulsador);
 public:
@@ -47,9 +47,15 @@ public:
   boolean isLigado() { return ligado; }
   WD2404 *getWD2404() { return this->wd2404; }
   
-  void setCallbackOnLigado( void (*onLigado)(Relogio *source) ) { this->onLigado = onLigado; }
-  void setCallbackOnDesligado( void (*onDesligado)(Relogio *source) ) { this->onDesligado = onDesligado; }
-
+   void setCallbackOnLigado(Callback<Relogio> *callback ) { 
+      callback->setNext(this->callbackOnLigado);
+      this->callbackOnLigado = callback;
+   }
+   void setCallbackOnDesligado(  Callback<Relogio> *callback ) { 
+     callback->setNext(this->callbackOnDesligado);
+     this->callbackOnDesligado = callback; 
+   }
+  
   void acionarPulsador(int idxPulsador, boolean ativar);
   boolean isEmPausa(int idxPulsador);
 };

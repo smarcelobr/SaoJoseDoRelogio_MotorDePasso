@@ -1,5 +1,5 @@
-#ifndef _LOGWD2404_SERIAL_H
-#define _LOGWD2404_SERIAL_H
+#ifndef _LOGRELOGIO_SERIAL_H
+#define _LOGRELOGIO_SERIAL_H
 
 #if defined(ARDUINO) && ARDUINO >= 100
    #include "Arduino.h"
@@ -7,19 +7,20 @@
    #include "WProgram.h"
 #endif   
 
-#include "WD2404.h"
+#include "Relogio.h"
 
 /**
  * Faz o led piscar quando há pulsos no WD2404 associado.
  * 
  */
-class LogWD2404_Serial {
+class LogRelogio_Serial {
 private:
   const __FlashStringHelper *id;
-  WD2404 *wd2404;
 
-  MetodoCallback<WD2404,LogWD2404_Serial> callbackEnable;
-  MetodoCallback<WD2404,LogWD2404_Serial> callbackDisable;
+  MetodoCallback<WD2404,LogRelogio_Serial> callbackEnable;
+  MetodoCallback<WD2404,LogRelogio_Serial> callbackDisable;
+  MetodoCallback<Relogio,LogRelogio_Serial> callbackLigado;
+  MetodoCallback<Relogio,LogRelogio_Serial> callbackDesligado;
 
   void onEnabled(WD2404 *source) {
     log(F("Enabled"));
@@ -29,6 +30,14 @@ private:
     log(F("Disabled"));
   }
 
+  void onLigado(Relogio *source) {
+    log(F("Ligado"));
+  }
+
+  void onDesligado(Relogio *source) {
+    log(F("Desligado"));
+  }
+
   void log(const __FlashStringHelper *msg) {
     Serial.print(this->id);
     Serial.print(F("-"));
@@ -36,19 +45,22 @@ private:
   }
 
 public:  
-  LogWD2404_Serial():
-            callbackEnable (MetodoCallback<WD2404,LogWD2404_Serial>(this, &LogWD2404_Serial::onEnabled)),
-            callbackDisable(MetodoCallback<WD2404,LogWD2404_Serial>(this, &LogWD2404_Serial::onDisabled))
+  LogRelogio_Serial():
+            callbackEnable (MetodoCallback<WD2404,LogRelogio_Serial>(this, &LogRelogio_Serial::onEnabled)),
+            callbackDisable(MetodoCallback<WD2404,LogRelogio_Serial>(this, &LogRelogio_Serial::onDisabled)),
+            callbackLigado(MetodoCallback<Relogio,LogRelogio_Serial>(this, &LogRelogio_Serial::onLigado)),
+            callbackDesligado(MetodoCallback<Relogio,LogRelogio_Serial>(this, &LogRelogio_Serial::onDesligado))
             {  }
 
-  void begin(const __FlashStringHelper *id, WD2404 &wd2404) {
-    this->wd2404 = &wd2404;
-    this->id = id;              
-    this->wd2404->setCallbackEnable(&callbackEnable);
-    this->wd2404->setCallbackDisable(&callbackDisable);
+  void begin(const __FlashStringHelper *id, Relogio &relogio) {
+
+    this->id = id;
+    relogio.getWD2404()->setCallbackEnable(&callbackEnable);
+    relogio.getWD2404()->setCallbackDisable(&callbackDisable);
+    relogio.setCallbackOnLigado(&callbackLigado);
+    relogio.setCallbackOnDesligado(&callbackDesligado);
   }
    
-  WD2404 *getWD2404() { return this->wd2404; }
 };
 
 #endif

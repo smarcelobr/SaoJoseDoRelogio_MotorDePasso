@@ -22,8 +22,8 @@ void ClockMotorDePasso::contaPassos(WD2404 *source) {
      }
 
      // a cada 24 horas, reseta o contador para 0:
-     if ( this->passosAcumulados >= ((unsigned long)(PASSOS_POR_HORA*24)) ) {
-        this->passosAcumulados = ((long)this->passosAcumulados) - (PASSOS_POR_HORA*24);
+     if ( ((long)this->passosAcumulados) >= (((long)PASSOS_POR_HORA)*24L) ) {
+        this->passosAcumulados = ((long)this->passosAcumulados) - (((long)PASSOS_POR_HORA)*24L);
      }
      
      // Chamar eventos a cada minuto, hora e segundo
@@ -53,10 +53,16 @@ unsigned int ClockMotorDePasso::getSegundo() {
 /** ajusta este clock com o ponteiro do relogio mecanico */
 void ClockMotorDePasso::set(unsigned int hora, unsigned int minuto, unsigned int segundo) {
   this->passosAcumulados = (hora*PASSOS_POR_HORA)+(minuto*PASSOS_POR_HORA/60)+(segundo*PASSOS_POR_HORA/3600);
+  this->lastSegundo = this->getSegundo();
 }
 
 void ClockMotorDePasso::setPassosAcumulados(unsigned long value) {
   this->passosAcumulados = value;
+
+  if ( ((long)this->passosAcumulados) >= (((long)PASSOS_POR_HORA)*24L) ) {
+     this->passosAcumulados = ((long)this->passosAcumulados) - (((long)PASSOS_POR_HORA)*24L);
+  }
+     
   this->lastSegundo = this->getSegundo();
 }
 

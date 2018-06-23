@@ -80,8 +80,8 @@ AcaoCursor *acoesCursor[NUM_MODOS] = {&acaoCursorNenhuma,
 IndicaPulsos indicaPulsosRelogio1(wd2404_1, ledRelogio1);
 IndicaPulsos indicaPulsosRelogio2(wd2404_2, ledRelogio2);
 
-LogWD2404_Serial wd2404_1_SerialStatus;
-LogWD2404_Serial wd2404_2_SerialStatus;
+LogRelogio_Serial relogio_1_SerialStatus;
+LogRelogio_Serial relogio_2_SerialStatus;
 
 /* botao cursor direita e esquerda */
 Botao botaoAntiHorario(A3);
@@ -98,6 +98,8 @@ void botaoMudaModoOnClick(Botao *botao) {
   botoesCursor.setAcaoCursor(*acoesCursor[modo%NUM_MODOS]);
 }
 FuncaoCallback<Botao> botaoMudaModo_onLow(botaoMudaModoOnClick);
+FuncaoCallback<Relogio> callbackOnLigado(relogio_onLigado);
+FuncaoCallback<Relogio> callbackOnDesligado(relogio_onDesligado);
 
 /* Botao Pausa/Continua: liga ou desliga todos os relógios. */
 Botao botaoPausaContinua(A5);
@@ -133,12 +135,12 @@ void setup() {
   wd2404_1.setCallbackOnDirChange(wd2404_onDirChange);
   wd2404_2.setCallbackOnDirChange(wd2404_onDirChange);
 
-  relogio_1.setCallbackOnLigado(relogio_onLigado);
-  relogio_1.setCallbackOnDesligado(relogio_onDesligado);
+  relogio_1.setCallbackOnLigado(&callbackOnLigado);
+  relogio_1.setCallbackOnDesligado(&callbackOnDesligado);
   relogio_1.ligar();
 
-  relogio_2.setCallbackOnLigado(relogio_onLigado);
-  relogio_2.setCallbackOnDesligado(relogio_onDesligado);
+  relogio_2.setCallbackOnLigado(&callbackOnLigado);
+  relogio_2.setCallbackOnDesligado(&callbackOnDesligado);
   relogio_2.ligar();
 
   botaoModo.setCallbackOnLOW(&botaoMudaModo_onLow);
@@ -147,8 +149,8 @@ void setup() {
   Serial.begin(9600);
   Serial.println(F("Sao Jose do Relogio - v.1.1"));
 
-  wd2404_1_SerialStatus.begin(F("W1"),wd2404_1);
-  wd2404_2_SerialStatus.begin(F("W2"),wd2404_2);
+  relogio_1_SerialStatus.begin(F("R1"), relogio_1);
+  relogio_2_SerialStatus.begin(F("R2"), relogio_2);
 
   unsigned int qtd = temporizador.getQtdItens();
   Serial.print(F("*T:"));

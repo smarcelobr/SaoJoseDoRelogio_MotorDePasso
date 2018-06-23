@@ -165,11 +165,11 @@ void ajuste(ItemTemporizado *source, int sinal) {
   int seg;
   if (source->getQtdChamadas()<10) {
     seg = 1;
-  } else if (source->getQtdChamadas()<20) {
+  } else if (source->getQtdChamadas()<60) {
     seg = PASSOS_POR_HORA/3600; // por segundo
-  } else if (source->getQtdChamadas()<80) {
+  } else if (source->getQtdChamadas()<66) {
     seg = (PASSOS_POR_HORA/3600)*10; // por 10 segundos
-  } else if (source->getQtdChamadas()<140) {
+  } else if (source->getQtdChamadas()<126) {
     seg = PASSOS_POR_HORA/60; // por minuto
   } else {
     seg = PASSOS_POR_HORA; // por hora

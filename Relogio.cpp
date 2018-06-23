@@ -62,8 +62,8 @@ void Relogio::ligar() {
   wd2404->sentidoHorario();
   wd2404->resetPulsos();
   ligado=true;
-  if (onLigado)
-     onLigado(this);
+    if (this->callbackOnLigado) 
+       this->callbackOnLigado->call(this);
   this->pulsosPendentes=0;
   this->pulsosDe3Minutos=0;
   for(int i = 0; i < NUM_PULSADORES; ++i) {
@@ -76,8 +76,8 @@ void Relogio::ligar() {
 
 void Relogio::desligar() {
   ligado=false;
-  if (onDesligado)
-     onDesligado(this);
+  if (this->callbackOnDesligado) 
+     this->callbackOnDesligado->call(this);
 }
 
 void Relogio::acionarPulsador(int idxPulsador, boolean ativar) {
